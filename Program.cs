@@ -1,4 +1,4 @@
-namespace ModBusTxApp
+namespace ModBusMaster
 {
     internal static class Program
     {

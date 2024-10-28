@@ -32,7 +32,6 @@
             connectBtn = new Button();
             dataRxTextBox = new RichTextBox();
             slaveTextBox = new TextBox();
-            funcCodeTextBox = new TextBox();
             addressTextBox = new TextBox();
             dataTextBox = new TextBox();
             txBtn = new Button();
@@ -40,6 +39,7 @@
             funcCodeLabel = new Label();
             dataLabel = new Label();
             addressLabel = new Label();
+            selFuncCode = new ComboBox();
             SuspendLayout();
             // 
             // selPortNm
@@ -75,13 +75,6 @@
             slaveTextBox.Name = "slaveTextBox";
             slaveTextBox.Size = new Size(117, 23);
             slaveTextBox.TabIndex = 3;
-            // 
-            // funcCodeTextBox
-            // 
-            funcCodeTextBox.Location = new Point(97, 141);
-            funcCodeTextBox.Name = "funcCodeTextBox";
-            funcCodeTextBox.Size = new Size(117, 23);
-            funcCodeTextBox.TabIndex = 4;
             // 
             // addressTextBox
             // 
@@ -143,11 +136,22 @@
             addressLabel.TabIndex = 10;
             addressLabel.Text = "주소";
             // 
+            // selFuncCode
+            // 
+            selFuncCode.DropDownStyle = ComboBoxStyle.DropDownList;
+            selFuncCode.FormattingEnabled = true;
+            selFuncCode.Items.AddRange(new object[] { "01 - Read Coils", "02 - Read Discrete Inputs", "03 - Read Holding Registers", "04 - Read Input Registers", "05 - Write Single Coil", "06 - Write Single Register", "15 - Write Multiple Coils", "16 - Write Multiple Registers" });
+            selFuncCode.Location = new Point(97, 141);
+            selFuncCode.Name = "selFuncCode";
+            selFuncCode.Size = new Size(117, 23);
+            selFuncCode.TabIndex = 12;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(459, 284);
+            Controls.Add(selFuncCode);
             Controls.Add(dataLabel);
             Controls.Add(addressLabel);
             Controls.Add(funcCodeLabel);
@@ -155,7 +159,6 @@
             Controls.Add(txBtn);
             Controls.Add(dataTextBox);
             Controls.Add(addressTextBox);
-            Controls.Add(funcCodeTextBox);
             Controls.Add(slaveTextBox);
             Controls.Add(dataRxTextBox);
             Controls.Add(connectBtn);
@@ -174,7 +177,6 @@
         private Button connectBtn;
         private RichTextBox dataRxTextBox;
         private TextBox slaveTextBox;
-        private TextBox funcCodeTextBox;
         private TextBox addressTextBox;
         private TextBox dataTextBox;
         private Button txBtn;
@@ -182,5 +184,6 @@
         private Label funcCodeLabel;
         private Label dataLabel;
         private Label addressLabel;
+        private ComboBox selFuncCode;
     }
 }

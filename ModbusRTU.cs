@@ -21,9 +21,20 @@ namespace ModBusMaster
             _data = data;
         }
 
+        public ModbusRTU(byte[] frame)
+        {
+            _frame = frame;
+            _slaveAddr = frame[0];
+            _functionCode = frame[1];
+            _data = new byte[frame.Length - 5];
+            Array.Copy(frame, 2, _data, 0, _data.Length);
+            _crc = new byte[2];
+            Array.Copy(frame, frame.Length - 2, _crc, 0, 2);
+        }
+
         public byte[] GetFrame()
         {
-            byte[] frame = new byte[1 + 1 + 1 + _data.Length + 2];
+            byte[] frame = new byte[1 + 1 + _data.Length + 2]; // SlaveAddr + FunctionCode + Data + CRC
 
             frame[0] = _slaveAddr;
             frame[1] = _functionCode;
@@ -35,6 +46,7 @@ namespace ModBusMaster
 
             return frame;
         }
+
 
         private static ushort CalcCRC(byte[] data, int offset, int count)
         {
@@ -61,6 +73,35 @@ namespace ModBusMaster
             return crc;
         }
 
+        public byte[] Frame
+        {
+            get { return _frame; }
+            set { _frame = value; }
+        }
+
+        public byte SlaveAddr
+        {
+            get { return _slaveAddr; }
+            set { _slaveAddr = value; }
+        }
+
+        public byte FunctionCode
+        {
+            get { return _functionCode; }
+            set { _functionCode = value; }
+        }
+
+        public byte[] Data
+        {
+            get { return _data; }
+            set { _data = value; }
+        }
+
+        public byte[] Crc
+        {
+            get { return _crc; }
+            set { _crc = value; }
+        }
 
     }
 }
