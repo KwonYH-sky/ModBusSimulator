@@ -1,10 +1,11 @@
 using System.IO.Ports;
+using ModBusMaster.Data;
 
 namespace ModBusMaster
 {
     public partial class MainForm : Form
     {
-        SerialPort serialPort;
+        private readonly SerialPort serialPort;
 
         public MainForm()
         {
@@ -34,6 +35,7 @@ namespace ModBusMaster
 
             connectBtn.Text = "¿­±â";
             SetControls(false);
+            selFuncCode.SelectedIndex = 0;
         }
 
         private void SetControls(bool isOpen)
@@ -51,19 +53,23 @@ namespace ModBusMaster
             byte[] buffer = new byte[sp.BytesToRead];
             sp.Read(buffer, 0, buffer.Length);
 
-            ModbusRTU modbusRTU = new ModbusRTU(buffer);
+            var packet = new RequestPacket(buffer);
+            byte[] crc = new byte[2];
+            Array.Copy(buffer, buffer.Length - 2, crc, 0, 2);
 
-            byte slaveAddr = modbusRTU.SlaveAddr;
-            byte functionCode = modbusRTU.FunctionCode;
-            byte[] data = modbusRTU.Data;
 
-            string str = $"SlaveAddr: {slaveAddr}, FunctionCode: {functionCode}, Data: ";
-            foreach (byte b in data)
+            // CRC Check
+            if (crc[0] != packet.Crc[0] || crc[1] != packet.Crc[1])
             {
-                str += $"{b:X2} ";
+                dataRxTextBox.Invoke(() => dataRxTextBox.AppendText("CRC Error\n"));
+                return;
             }
 
-            dataRxTextBox.Invoke(new Action(() => dataRxTextBox.AppendText(str + "\n")));
+            string str = "";
+
+            foreach (byte b in buffer) str += b.ToString("X2") + " ";
+
+            dataRxTextBox.Invoke(() => dataRxTextBox.AppendText( str + "\n"));
         }
 
         private void connectBtn_Click(object sender, EventArgs e)
@@ -93,12 +99,12 @@ namespace ModBusMaster
 
         private void txBtn_Click(object sender, EventArgs e)
         {
-            byte slaveAddr = byte.Parse(slaveTextBox.Text);
+            byte slaveAddr = Convert.ToByte(slaveTextBox.Text, 16);
             byte functionCode = SelFuncCodeToByte();
-            short address = Convert.ToInt16(addressTextBox.Text);
-            short data = Convert.ToInt16(dataTextBox.Text);
+            ushort address = Convert.ToUInt16(addressTextBox.Text, 16);
+            ushort data = Convert.ToUInt16(dataTextBox.Text, 16);
 
-            ModbusRTU modbusRTU = new ModbusRTUBuilder()
+            RequestPacket modbusRTU = new RequestPacket.RequestPacketBuilder()
                 .SetSlaveAddr(slaveAddr)
                 .SetFunctionCode(functionCode)
                 .SetData([ 
@@ -106,7 +112,7 @@ namespace ModBusMaster
                 ])
                 .Build();
 
-            byte[] frame = modbusRTU.GetFrame();
+            byte[] frame = modbusRTU.Frame;
             serialPort.Write(frame, 0, frame.Length);
         }
 

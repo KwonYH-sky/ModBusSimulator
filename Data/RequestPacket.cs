@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ModBusMaster
+﻿namespace ModBusMaster.Data
 {
-    internal class ModbusRTU
+    class RequestPacket
     {
         private byte[] _frame;
         private byte _slaveAddr;
@@ -14,14 +8,18 @@ namespace ModBusMaster
         private byte[] _data;
         private byte[] _crc;
 
-        public ModbusRTU(byte slaveAddr, byte functionCode, byte[] data)
+        public RequestPacket(byte slaveAddr, byte functionCode, byte[] data)
         {
             _slaveAddr = slaveAddr;
             _functionCode = functionCode;
             _data = data;
+
+            _frame = GetFrame();
+            _crc = new byte[2];
+            Array.Copy(_frame, _frame.Length - 2, _crc, 0, 2);
         }
 
-        public ModbusRTU(byte[] frame)
+        public RequestPacket(byte[] frame)
         {
             _frame = frame;
             _slaveAddr = frame[0];
@@ -40,38 +38,13 @@ namespace ModBusMaster
             frame[1] = _functionCode;
             Array.Copy(_data, 0, frame, 2, _data.Length);
 
-            ushort crc = CalcCRC(frame, 0, frame.Length - 2);
+            ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
             frame[frame.Length - 2] = (byte)(crc & 0xFF);
             frame[frame.Length - 1] = (byte)(crc >> 8);
 
             return frame;
         }
 
-
-        private static ushort CalcCRC(byte[] data, int offset, int count)
-        {
-            ushort crc = 0xFFFF;
-
-            for (int i = offset; i < offset + count; i++)
-            {
-                crc ^= data[i];
-
-                for (int j = 0; j < 8; j++)
-                {
-                    if ((crc & 0x0001) == 1)
-                    {
-                        crc >>= 1;
-                        crc ^= 0xA001;
-                    }
-                    else
-                    {
-                        crc >>= 1;
-                    }
-                }
-            }
-
-            return crc;
-        }
 
         public byte[] Frame
         {
@@ -103,5 +76,35 @@ namespace ModBusMaster
             set { _crc = value; }
         }
 
+
+        public class RequestPacketBuilder
+        {
+            private byte _slaveAddr;
+            private byte _functionCode;
+            private byte[] _data;
+
+            public RequestPacketBuilder SetSlaveAddr(byte slaveAddr)
+            {
+                _slaveAddr = slaveAddr;
+                return this;
+            }
+
+            public RequestPacketBuilder SetFunctionCode(byte functionCode)
+            {
+                _functionCode = functionCode;
+                return this;
+            }
+
+            public RequestPacketBuilder SetData(byte[] data)
+            {
+                _data = data;
+                return this;
+            }
+
+            public RequestPacket Build()
+            {
+                return new RequestPacket(_slaveAddr, _functionCode, _data);
+            }
+        }
     }
 }

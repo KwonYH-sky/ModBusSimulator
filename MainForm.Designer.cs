@@ -65,7 +65,7 @@
             // 
             dataRxTextBox.Location = new Point(232, 12);
             dataRxTextBox.Name = "dataRxTextBox";
-            dataRxTextBox.Size = new Size(215, 260);
+            dataRxTextBox.Size = new Size(264, 260);
             dataRxTextBox.TabIndex = 2;
             dataRxTextBox.Text = "";
             // 
@@ -150,7 +150,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(459, 284);
+            ClientSize = new Size(508, 284);
             Controls.Add(selFuncCode);
             Controls.Add(dataLabel);
             Controls.Add(addressLabel);
