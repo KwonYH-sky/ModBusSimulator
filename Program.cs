@@ -3,7 +3,7 @@
 using ModBusSlave;
 
 SerialPortConnector serialPortConnector = new SerialPortConnector();
-serialPortConnector.GetPortNames();
+SerialPortConnector.GetPortNames();
 string portName = Console.ReadLine();
 try
 {
@@ -17,6 +17,18 @@ catch (Exception e)
 }
 
 Console.WriteLine("연결되었습니다.");
+
+while (true)
+{
+    Console.WriteLine("종료하려면 'q' or 'Q'를 입력하세요.");
+    string input = Console.ReadLine()?.ToLower();
+
+    if (input == "q")
+    {
+        serialPortConnector.Close();
+        return;
+    }
+}
 
 
 
