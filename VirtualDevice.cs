@@ -1,4 +1,4 @@
-﻿namespace ModBusSlave
+﻿namespace ModBusSimSlave
 {
     public class VirtualDevice
     {
