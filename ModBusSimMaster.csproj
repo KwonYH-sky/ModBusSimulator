@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ModBusSimulatorSlave\**" />
+    <EmbeddedResource Remove="ModBusSimulatorSlave\**" />
+    <None Remove="ModBusSimulatorSlave\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="8.0.0" />
   </ItemGroup>
 

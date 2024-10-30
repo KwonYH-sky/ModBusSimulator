@@ -1,4 +1,6 @@
-namespace ModBusMaster
+using ModBusMaster;
+
+namespace ModBusSimMaster
 {
     internal static class Program
     {

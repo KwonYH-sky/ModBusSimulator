@@ -1,5 +1,5 @@
 using System.IO.Ports;
-using ModBusMaster.Data;
+using ModBusSimMaster.Data;
 
 namespace ModBusMaster
 {

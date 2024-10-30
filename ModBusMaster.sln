@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35327.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModBusMaster", "ModBusMaster.csproj", "{A4B78597-F5FA-44FB-B2FC-64E60B35F5AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModBusSimMaster", "ModBusSimMaster.csproj", "{A4B78597-F5FA-44FB-B2FC-64E60B35F5AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModBusSlave", "..\ModBusSlave\ModBusSlave.csproj", "{4C167E01-F89E-4112-895A-1B71E5657805}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModBusSimSlave", "..\ModBusSlave\ModBusSimSlave.csproj", "{4C167E01-F89E-4112-895A-1B71E5657805}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A4B78597-F5FA-44FB-B2FC-64E60B35F5AE} = {A4B78597-F5FA-44FB-B2FC-64E60B35F5AE}
 	EndProjectSection
