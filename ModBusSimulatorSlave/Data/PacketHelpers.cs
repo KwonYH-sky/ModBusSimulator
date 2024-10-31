@@ -1,4 +1,4 @@
-﻿namespace ModBusMaster.Data
+﻿namespace ModBusSlave.Data
 {
     internal static class PacketHelpers
     {

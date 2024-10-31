@@ -1,4 +1,5 @@
-﻿using ModBusMaster.Data;
+﻿using ModBusSimSlave;
+using ModBusSlave.Data;
 using System.Diagnostics;
 using System.IO.Ports;
 
@@ -6,7 +7,9 @@ namespace ModBusSlave
 {
     public class SerialPortConnector
     {
-        SerialPort seriallPort = new SerialPort();
+        private SerialPort seriallPort = new();
+        private VirtualDevice device = new(1, 10, 10);
+        private Service service;
 
         public SerialPortConnector()
         {
@@ -18,6 +21,15 @@ namespace ModBusSlave
             seriallPort.ReadTimeout = 500;
             seriallPort.WriteTimeout = 500;
             seriallPort.DataReceived += DataReceivedHandler;
+
+            device.InputRegisters[0] = Convert.ToUInt16(DateTime.Now.Year);
+            device.InputRegisters[1] = Convert.ToUInt16(DateTime.Now.Month);
+            device.InputRegisters[2] = Convert.ToUInt16(DateTime.Now.Day);
+            device.InputRegisters[3] = Convert.ToUInt16(DateTime.Now.Hour);
+            device.InputRegisters[4] = Convert.ToUInt16(DateTime.Now.Minute);
+            device.InputRegisters[5] = Convert.ToUInt16(DateTime.Now.Second);
+
+            service = new Service(device);
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -41,17 +53,7 @@ namespace ModBusSlave
             packet.Data.ToList().ForEach(e => Debug.Write($"{e} "));
             Debug.WriteLine("");
 
-            VirtualDevice device = new VirtualDevice(1, 10, 10);
-
-            device.InputRegisters[0] = Convert.ToUInt16(DateTime.Now.Year);
-            device.InputRegisters[1] = Convert.ToUInt16(DateTime.Now.Month);
-            device.InputRegisters[2] = Convert.ToUInt16(DateTime.Now.Day);
-            device.InputRegisters[3] = Convert.ToUInt16(DateTime.Now.Hour);
-            device.InputRegisters[4] = Convert.ToUInt16(DateTime.Now.Minute);
-            device.InputRegisters[5] = Convert.ToUInt16(DateTime.Now.Second);
-
-            Service service = new Service(device, packet);
-            ResponsePacket? response = service.Response();
+            ResponsePacket? response = service.Response(packet);
 
             if (response == null)
             {
@@ -59,7 +61,7 @@ namespace ModBusSlave
                 return;
             }
 
-            byte[] frame = response.GetFrame();
+            byte[] frame = response.Frame;
             Debug.WriteLine("응답 데이터");
             frame.ToList().ForEach(e => Debug.Write($"{e} "));
             Debug.WriteLine("");
