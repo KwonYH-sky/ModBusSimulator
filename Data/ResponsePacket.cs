@@ -1,4 +1,4 @@
-﻿namespace ModBusSlave.Data
+﻿namespace ModBusSimSlave.Data
 {
     class ResponsePacket
     {
