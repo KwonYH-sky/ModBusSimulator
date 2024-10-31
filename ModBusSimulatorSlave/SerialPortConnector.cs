@@ -1,15 +1,15 @@
-﻿using ModBusSimSlave;
-using ModBusSlave.Data;
+﻿using ModBusSimSlave.Data;
 using System.Diagnostics;
 using System.IO.Ports;
 
-namespace ModBusSlave
+namespace ModBusSimSlave
 {
     public class SerialPortConnector
     {
         private SerialPort seriallPort = new();
         private VirtualDevice device = new(1, 10, 10);
         private Service service;
+        private readonly List<byte> packetBuffer = [];
 
         public SerialPortConnector()
         {
@@ -32,11 +32,19 @@ namespace ModBusSlave
             service = new Service(device);
         }
 
-        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        private async void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
+            await Task.Delay(100); // 100ms 지연 추가
+
             SerialPort sp = (SerialPort)sender;
             byte[] buffer = new byte[sp.BytesToRead];
             sp.Read(buffer, 0, buffer.Length);
+
+            Debug.WriteLine($"버퍼 {buffer}");
+            buffer.ToList().ForEach(e => Debug.Write($"{e.ToString("X2")} "));
+            Debug.WriteLine("");
+
+            packetBuffer.AddRange(buffer);
 
             var packet = new RequestPacket(buffer);
             byte[] crc = new byte[2];
@@ -50,7 +58,7 @@ namespace ModBusSlave
 
             Debug.WriteLine("수신 데이터");
             Debug.WriteLine($"SlaveAddr: {packet.SlaveAddr} FunctioanCode: {packet.FunctionCode}");
-            packet.Data.ToList().ForEach(e => Debug.Write($"{e} "));
+            packet.Data.ToList().ForEach(e => Debug.Write($"{e.ToString("X2")} "));
             Debug.WriteLine("");
 
             ResponsePacket? response = service.Response(packet);
@@ -63,7 +71,7 @@ namespace ModBusSlave
 
             byte[] frame = response.Frame;
             Debug.WriteLine("응답 데이터");
-            frame.ToList().ForEach(e => Debug.Write($"{e} "));
+            frame.ToList().ForEach(e => Debug.Write($"{e.ToString("X2")} "));
             Debug.WriteLine("");
             seriallPort.Write(frame, 0, frame.Length);
         }

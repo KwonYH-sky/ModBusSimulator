@@ -1,7 +1,6 @@
-﻿using ModBusSimSlave;
-using ModBusSlave.Data;
+﻿using ModBusSimSlave.Data;
 
-namespace ModBusSlave
+namespace ModBusSimSlave
 {
     class Service
     {
@@ -18,8 +17,11 @@ namespace ModBusSlave
 
             Console.WriteLine("수신 데이터");
             Console.WriteLine($"SlaveAddr: {requestPacket.SlaveAddr} FunctioanCode: {requestPacket.FunctionCode}");
+            Console.Write("Data: ");
             requestPacket.Data.ToList().ForEach(e => Console.Write($"{e} "));
             Console.WriteLine("");
+
+            VirtualDevice.UpdateComunication();
 
             return requestPacket.FunctionCode switch
             {
@@ -30,7 +32,7 @@ namespace ModBusSlave
                 0x05 => WriteSingleCoil(requestPacket),
                 0x06 => WriteSingleRegister(requestPacket),
                 0x0F => WriteMultipleCoils(requestPacket),
-                0x10 => WriteMultipleRegisters(),
+                0x10 => WriteMultipleRegisters(requestPacket),
                 _ => null,
             };
         }
@@ -162,8 +164,10 @@ namespace ModBusSlave
             byte byteCount = packet.Data[4];
             byte[] writeData = packet.Data.Skip(5).ToArray();
 
+            // 쓰기 데이터를 코일에 쓰기
             for (int i = 0; i < quantity; i++)
             {
+                // writeData의 i번째 비트가 1이면 true, 0이면 false
                 bool bit = ((writeData[i/8] >> (i % 8)) & 0x01) == 1;
                 VirtualDevice.Coils[address + i] = bit;
             }
@@ -171,14 +175,30 @@ namespace ModBusSlave
             return new ResponsePacket.ResponsePacketBuilder()
                 .SetSlaveAddr(packet.SlaveAddr)
                 .SetFunctionCode(packet.FunctionCode)
-                .SetData(packet.Data)
+                .SetData(packet.Data.Take(4).ToArray())
                 .Build();
         }
 
-        private ResponsePacket WriteMultipleRegisters()
+        private ResponsePacket WriteMultipleRegisters(RequestPacket packet)
         {
-            // TODO: WriteMultipleRegisters
-            return null;
+            ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
+            ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
+
+            byte byteCount = packet.Data[4];
+            byte[] writeData = packet.Data.Skip(5).ToArray();
+
+            // 쓰기 데이터를 레지스터에 쓰기
+            for (int i = 0; i < quantity; i++)
+            {
+                ushort value = (ushort)((writeData[i * 2] << 8) | writeData[i * 2 + 1] & 0xFF);
+                VirtualDevice.HoldingRegisters[address + i] = value;
+            }
+
+            return new ResponsePacket.ResponsePacketBuilder()
+                .SetSlaveAddr(packet.SlaveAddr)
+                .SetFunctionCode(packet.FunctionCode)
+                .SetData(packet.Data.Take(4).ToArray())
+                .Build();
         }
 
     }
