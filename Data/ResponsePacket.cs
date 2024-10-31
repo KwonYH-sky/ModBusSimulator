@@ -9,11 +9,7 @@
         private byte[] _data;
         private byte[] _crc;
 
-<<<<<<< HEAD
         private ResponsePacket(byte slaveArr, byte functionCode, byte dataLength, byte[] data)
-=======
-        public ResponsePacket(byte slaveArr, byte functionCode, byte dataLength, byte[] data)
->>>>>>> 5eacb85e602b94055b4f4ae2c1f4d40e591d0c2a
         {
             _slaveAddr = slaveArr;
             _functionCode = functionCode;

@@ -1,7 +1,7 @@
 using System.IO.Ports;
 using ModBusSimMaster.Data;
 
-namespace ModBusMaster
+namespace ModBusSimMaster
 {
     public partial class MainForm : Form
     {

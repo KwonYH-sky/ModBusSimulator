@@ -10,11 +10,7 @@
         private byte[] _writeData;
         private byte[] _crc;
 
-<<<<<<< HEAD
         private RequestPacket(byte slaveAddr, byte functionCode, byte[] data)
-=======
-        public RequestPacket(byte slaveAddr, byte functionCode, byte[] data)
->>>>>>> 5eacb85e602b94055b4f4ae2c1f4d40e591d0c2a
         {
             _slaveAddr = slaveAddr;
             _functionCode = functionCode;

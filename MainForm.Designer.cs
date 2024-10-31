@@ -1,4 +1,4 @@
-﻿namespace ModBusMaster
+﻿namespace ModBusSimMaster
 {
     partial class MainForm
     {
