@@ -6,6 +6,7 @@ namespace ModBusSimMaster
     public partial class MainForm : Form
     {
         private readonly SerialPort serialPort;
+        private readonly List<byte> packetBuffer = [];
 
         public MainForm()
         {
@@ -45,13 +46,18 @@ namespace ModBusSimMaster
             addressTextBox.Enabled = isOpen;
             dataTextBox.Enabled = isOpen;
             txBtn.Enabled = isOpen;
+            selPortNm.Enabled = !isOpen;
         }
 
-        private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        private async void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
+            await Task.Delay(100); // 100ms 지연 추가
+
             SerialPort sp = (SerialPort)sender;
             byte[] buffer = new byte[sp.BytesToRead];
             sp.Read(buffer, 0, buffer.Length);
+
+
 
             var packet = new RequestPacket(buffer);
             byte[] crc = new byte[2];
@@ -132,5 +138,6 @@ namespace ModBusSimMaster
             };
             ;
         }
+
     }
 }

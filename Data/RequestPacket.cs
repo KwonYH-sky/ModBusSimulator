@@ -38,6 +38,7 @@
 
         public RequestPacket(byte[] frame)
         {
+            _frame = frame;
             if (frame[1] == 0x0F || frame[1] == 0x10)
             {
                 _slaveAddr = frame[0];
@@ -54,7 +55,7 @@
             {
                 _slaveAddr = frame[0];
                 _functionCode = frame[1];
-                _data = new byte[frame.Length - 5];
+                _data = new byte[frame.Length - 4];
                 Array.Copy(frame, 2, _data, 0, _data.Length);
                 _crc = new byte[2];
                 Array.Copy(frame, frame.Length - 2, _crc, 0, 2);
