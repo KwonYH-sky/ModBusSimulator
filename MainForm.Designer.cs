@@ -40,6 +40,8 @@
             dataLabel = new Label();
             addressLabel = new Label();
             selFuncCode = new ComboBox();
+            quantityLabel = new Label();
+            quantityTxBox = new TextBox();
             SuspendLayout();
             // 
             // selPortNm
@@ -71,24 +73,25 @@
             // 
             // slaveTextBox
             // 
-            slaveTextBox.Location = new Point(97, 112);
+            slaveTextBox.Location = new Point(97, 62);
             slaveTextBox.Name = "slaveTextBox";
             slaveTextBox.Size = new Size(117, 23);
             slaveTextBox.TabIndex = 3;
             // 
             // addressTextBox
             // 
-            addressTextBox.Location = new Point(97, 170);
+            addressTextBox.Location = new Point(97, 120);
             addressTextBox.Name = "addressTextBox";
             addressTextBox.Size = new Size(117, 23);
             addressTextBox.TabIndex = 5;
             // 
             // dataTextBox
             // 
-            dataTextBox.Location = new Point(97, 199);
+            dataTextBox.Location = new Point(97, 178);
             dataTextBox.Name = "dataTextBox";
             dataTextBox.Size = new Size(117, 23);
             dataTextBox.TabIndex = 6;
+            dataTextBox.TextChanged += dataTextBox_TextChanged;
             // 
             // txBtn
             // 
@@ -103,7 +106,7 @@
             // slaveIdLabel
             // 
             slaveIdLabel.AutoSize = true;
-            slaveIdLabel.Location = new Point(12, 112);
+            slaveIdLabel.Location = new Point(12, 62);
             slaveIdLabel.Name = "slaveIdLabel";
             slaveIdLabel.Size = new Size(67, 15);
             slaveIdLabel.TabIndex = 8;
@@ -112,7 +115,7 @@
             // funcCodeLabel
             // 
             funcCodeLabel.AutoSize = true;
-            funcCodeLabel.Location = new Point(12, 144);
+            funcCodeLabel.Location = new Point(12, 94);
             funcCodeLabel.Name = "funcCodeLabel";
             funcCodeLabel.Size = new Size(61, 15);
             funcCodeLabel.TabIndex = 9;
@@ -121,7 +124,7 @@
             // dataLabel
             // 
             dataLabel.AutoSize = true;
-            dataLabel.Location = new Point(12, 202);
+            dataLabel.Location = new Point(12, 181);
             dataLabel.Name = "dataLabel";
             dataLabel.Size = new Size(43, 15);
             dataLabel.TabIndex = 11;
@@ -130,7 +133,7 @@
             // addressLabel
             // 
             addressLabel.AutoSize = true;
-            addressLabel.Location = new Point(12, 173);
+            addressLabel.Location = new Point(12, 123);
             addressLabel.Name = "addressLabel";
             addressLabel.Size = new Size(31, 15);
             addressLabel.TabIndex = 10;
@@ -141,16 +144,35 @@
             selFuncCode.DropDownStyle = ComboBoxStyle.DropDownList;
             selFuncCode.FormattingEnabled = true;
             selFuncCode.Items.AddRange(new object[] { "01 - Read Coils", "02 - Read Discrete Inputs", "03 - Read Holding Registers", "04 - Read Input Registers", "05 - Write Single Coil", "06 - Write Single Register", "15 - Write Multiple Coils", "16 - Write Multiple Registers" });
-            selFuncCode.Location = new Point(97, 141);
+            selFuncCode.Location = new Point(97, 91);
             selFuncCode.Name = "selFuncCode";
             selFuncCode.Size = new Size(117, 23);
             selFuncCode.TabIndex = 12;
+            selFuncCode.SelectedIndexChanged += selFuncCode_SelectedIndexChanged;
+            // 
+            // quantityLabel
+            // 
+            quantityLabel.AutoSize = true;
+            quantityLabel.Location = new Point(12, 152);
+            quantityLabel.Name = "quantityLabel";
+            quantityLabel.Size = new Size(31, 15);
+            quantityLabel.TabIndex = 14;
+            quantityLabel.Text = "수량";
+            // 
+            // quantityTxBox
+            // 
+            quantityTxBox.Location = new Point(97, 149);
+            quantityTxBox.Name = "quantityTxBox";
+            quantityTxBox.Size = new Size(117, 23);
+            quantityTxBox.TabIndex = 13;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(508, 284);
+            Controls.Add(quantityLabel);
+            Controls.Add(quantityTxBox);
             Controls.Add(selFuncCode);
             Controls.Add(dataLabel);
             Controls.Add(addressLabel);
@@ -185,5 +207,7 @@
         private Label dataLabel;
         private Label addressLabel;
         private ComboBox selFuncCode;
+        private Label quantityLabel;
+        private TextBox quantityTxBox;
     }
 }

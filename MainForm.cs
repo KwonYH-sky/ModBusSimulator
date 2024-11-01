@@ -1,4 +1,5 @@
 using System.IO.Ports;
+using System.Text;
 using ModBusSimMaster.Data;
 
 namespace ModBusSimMaster
@@ -6,6 +7,8 @@ namespace ModBusSimMaster
     public partial class MainForm : Form
     {
         private readonly SerialPort serialPort;
+
+        private readonly object packetBufferLock = new();
         private readonly List<byte> packetBuffer = [];
 
         public MainForm()
@@ -35,8 +38,8 @@ namespace ModBusSimMaster
             }
 
             connectBtn.Text = "열기";
-            SetControls(false);
             selFuncCode.SelectedIndex = 0;
+            SetControls(false);
         }
 
         private void SetControls(bool isOpen)
@@ -44,9 +47,16 @@ namespace ModBusSimMaster
             slaveTextBox.Enabled = isOpen;
             selFuncCode.Enabled = isOpen;
             addressTextBox.Enabled = isOpen;
-            dataTextBox.Enabled = isOpen;
             txBtn.Enabled = isOpen;
             selPortNm.Enabled = !isOpen;
+
+            if (isOpen)
+                ToggleInputFields();
+            else
+            {
+                dataTextBox.Enabled = false;
+                quantityTxBox.Enabled = false;
+            }
         }
 
         private async void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -57,25 +67,42 @@ namespace ModBusSimMaster
             byte[] buffer = new byte[sp.BytesToRead];
             sp.Read(buffer, 0, buffer.Length);
 
+            ProcessPacketBuffer(buffer);
 
+        }
 
-            var packet = new RequestPacket(buffer);
-            byte[] crc = new byte[2];
-            Array.Copy(buffer, buffer.Length - 2, crc, 0, 2);
-
-
-            // CRC Check
-            if (crc[0] != packet.Crc[0] || crc[1] != packet.Crc[1])
+        private void ProcessPacketBuffer(byte[] bytes)
+        {
+            lock (packetBufferLock)
             {
-                dataRxTextBox.Invoke(() => dataRxTextBox.AppendText("CRC Error\n"));
-                return;
+                packetBuffer.AddRange(bytes);
+
+                while (packetBuffer.Count >= 5)
+                {
+                    int expectedLength = PacketHelpers.GetExpectedResponsePKLength(packetBuffer.ToArray());
+
+                    if (packetBuffer.Count < expectedLength) break;
+
+                    byte[] packetBytes = packetBuffer.GetRange(0, expectedLength).ToArray();
+
+                    if (PacketHelpers.CheckCRC(packetBytes))
+                    {
+                        var resPacket = new ResponsePacket(packetBytes);
+                        StringBuilder sb = new();
+                        sb.Append($"SlaveID: {resPacket.SlaveAddr} FunctionCode: {resPacket.FunctionCode}\n");
+                        sb.Append("Data: ");
+                        resPacket.Data.ToList().ForEach(e => sb.Append($"{e:X2} "));
+                        dataRxTextBox.Invoke(() => dataRxTextBox.AppendText($"{sb}\n"));
+                        packetBuffer.RemoveRange(0, expectedLength);
+                    }
+                    else
+                    {
+                        dataRxTextBox.Invoke(() => dataRxTextBox.AppendText("CRC Error\n"));
+                        packetBuffer.RemoveAt(0);
+                    }
+
+                }
             }
-
-            string str = "";
-
-            foreach (byte b in buffer) str += b.ToString("X2") + " ";
-
-            dataRxTextBox.Invoke(() => dataRxTextBox.AppendText( str + "\n"));
         }
 
         private void connectBtn_Click(object sender, EventArgs e)
@@ -108,17 +135,24 @@ namespace ModBusSimMaster
             byte slaveAddr = Convert.ToByte(slaveTextBox.Text, 16);
             byte functionCode = SelFuncCodeToByte();
             ushort address = Convert.ToUInt16(addressTextBox.Text, 16);
-            ushort data = Convert.ToUInt16(dataTextBox.Text, 16);
 
-            RequestPacket modbusRTU = new RequestPacket.RequestPacketBuilder()
+            // TODO: 수량, 데이터 functionCode에 따라 다르게 처리
+            // 0x01, 0x02, 0x03, 0x04: 수량
+            // 0x05, 0x06: 데이터
+            // 0x0F, 0x10: 수량, 데이터
+            ushort quantity = Convert.ToUInt16(quantityTxBox.Text, 16);
+            ushort data = dataTextBox.Enabled ? Convert.ToUInt16(dataTextBox.Text, 16) : quantity;
+
+            // TODO: RequestPacket FunctionCode에 따라 다르게 생성
+            var packet = new RequestPacket.RequestPacketBuilder()
                 .SetSlaveAddr(slaveAddr)
                 .SetFunctionCode(functionCode)
-                .SetData([ 
-                    (byte)(address >> 8), (byte)(address & 0xFF), (byte)(data >> 8), (byte)(data & 0xFF) 
+                .SetData([
+                    (byte)(address >> 8), (byte)(address & 0xFF), (byte)(data >> 8), (byte)(data & 0xFF)
                 ])
                 .Build();
 
-            byte[] frame = modbusRTU.Frame;
+            byte[] frame = packet.Frame;
             serialPort.Write(frame, 0, frame.Length);
         }
 
@@ -139,5 +173,34 @@ namespace ModBusSimMaster
             ;
         }
 
+        private void dataTextBox_TextChanged(object sender, EventArgs e)
+        {
+            // TODO: dataTextBox의 값이 0xFFFF를 넘어가면 0xFFFF로 설정
+            // 멀티 쓰기 일 경우 byteCount를 넘어가면 byteCount로 설정
+        }
+
+        private void selFuncCode_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ToggleInputFields();
+        }
+
+        private void ToggleInputFields()
+        {
+            if (SelFuncCodeToByte() == 0x01 || SelFuncCodeToByte() == 0x02 || SelFuncCodeToByte() == 0x03 || SelFuncCodeToByte() == 0x04)
+            {
+                quantityTxBox.Enabled = true;
+                dataTextBox.Enabled = false;
+            }
+            else if (SelFuncCodeToByte() == 0x05 || SelFuncCodeToByte() == 0x06)
+            {
+                quantityTxBox.Enabled = false;
+                dataTextBox.Enabled = true;
+            }
+            else if (SelFuncCodeToByte() == 0x0F || SelFuncCodeToByte() == 0x10)
+            {
+                quantityTxBox.Enabled = true;
+                dataTextBox.Enabled = true;
+            }
+        }
     }
 }

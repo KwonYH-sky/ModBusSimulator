@@ -39,6 +39,7 @@
         public RequestPacket(byte[] frame)
         {
             _frame = frame;
+            // 멀티 코일 & 레지스터 쓰기
             if (frame[1] == 0x0F || frame[1] == 0x10)
             {
                 _slaveAddr = frame[0];
