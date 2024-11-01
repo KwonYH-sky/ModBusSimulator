@@ -8,7 +8,9 @@ namespace ModBusSimSlave
     {
         private SerialPort seriallPort = new();
         private VirtualDevice device = new(1, 10, 10);
-        private Service service;
+        private readonly Service service;
+
+        private readonly Object packBufferLock = new();
         private readonly List<byte> packetBuffer = [];
 
         public SerialPortConnector()
@@ -41,39 +43,60 @@ namespace ModBusSimSlave
             sp.Read(buffer, 0, buffer.Length);
 
             Debug.WriteLine($"버퍼 {buffer}");
-            buffer.ToList().ForEach(e => Debug.Write($"{e.ToString("X2")} "));
+            buffer.ToList().ForEach(e => Debug.Write($"{e:X2} "));
             Debug.WriteLine("");
 
-            packetBuffer.AddRange(buffer);
+            ProcessPacketBuffer(buffer);
+        }
 
-            var packet = new RequestPacket(buffer);
-            byte[] crc = new byte[2];
-            Array.Copy(buffer, buffer.Length - 2, crc, 0, 2);
-
-            if (crc[0] != packet.Crc[0] && crc[1] != packet.Crc[1])
+        private void ProcessPacketBuffer(byte[] bytes)
+        {
+            lock(packBufferLock)
             {
-                Console.Error.WriteLine("CRC 불일치");
-                return;
+                packetBuffer.AddRange(bytes);
+                while(packetBuffer.Count >= 8)
+                {
+                    int expectedLength = PacketHelpers.GetExpectedRequestPKLength(packetBuffer.ToArray());
+
+                    if (packetBuffer.Count < expectedLength) break;
+
+                    byte[] packetBytes = packetBuffer.GetRange(0, expectedLength).ToArray();
+
+                    if (PacketHelpers.CheckCRC(packetBytes))
+                    {
+                        var packet = new RequestPacket(packetBytes);
+
+                        Debug.WriteLine("수신 데이터");
+                        Debug.WriteLine($"SlaveAddr: {packet.SlaveAddr} FunctioanCode: {packet.FunctionCode}");
+                        packet.Data.ToList().ForEach(e => Debug.Write($"{e:X2} "));
+                        Debug.WriteLine("");
+
+                        ResponsePacket? response = service.Response(packet);
+                        byte[] frame;
+
+                        if (response == null)
+                        {
+                            Debug.WriteLine("응답 데이터 없음");
+                            frame = [1];
+                        }
+                        else
+                        {
+                            frame = response.Frame;
+                            Debug.WriteLine("응답 데이터");
+                            frame.ToList().ForEach(e => Debug.Write($"{e:X2} "));
+                            Debug.WriteLine("");
+                        }
+
+                        seriallPort.Write(frame, 0, frame.Length);
+                        packetBuffer.RemoveRange(0, expectedLength);
+                    } else
+                    {
+                        Console.Error.WriteLine("CRC 불일치");
+                        packetBuffer.RemoveAt(0);
+                    }
+
+                }
             }
-
-            Debug.WriteLine("수신 데이터");
-            Debug.WriteLine($"SlaveAddr: {packet.SlaveAddr} FunctioanCode: {packet.FunctionCode}");
-            packet.Data.ToList().ForEach(e => Debug.Write($"{e.ToString("X2")} "));
-            Debug.WriteLine("");
-
-            ResponsePacket? response = service.Response(packet);
-
-            if (response == null)
-            {
-                Debug.WriteLine("응답 데이터 없음");
-                return;
-            }
-
-            byte[] frame = response.Frame;
-            Debug.WriteLine("응답 데이터");
-            frame.ToList().ForEach(e => Debug.Write($"{e.ToString("X2")} "));
-            Debug.WriteLine("");
-            seriallPort.Write(frame, 0, frame.Length);
         }
 
         public void Open(string portName)
