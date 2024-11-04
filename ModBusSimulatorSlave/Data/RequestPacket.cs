@@ -7,7 +7,7 @@
         private byte _functionCode;
         private byte[] _data;
         private byte _byteCount;
-        private byte[] _writeData;
+        private byte[] _multiWirteData;
         private byte[] _crc;
 
         private RequestPacket(byte slaveAddr, byte functionCode, byte[] data)
@@ -22,13 +22,21 @@
         }
 
         // 멀티 코일 & 레지스터 쓰기를 위한 생성자
-        private RequestPacket(byte slaveAddr, byte functionCode, byte[] data, byte byteCnt, byte[] writeData)
+        private RequestPacket(byte slaveAddr, byte functionCode, byte[] data, byte[] writeData)
         {
             _slaveAddr = slaveAddr;
             _functionCode = functionCode;
             _data = data;
-            _byteCount = byteCnt;
-            _writeData = writeData;
+
+            ushort quantity = (ushort)(data[2] << 8 | data[3] & 0xFF);
+
+            _byteCount = _functionCode switch
+            {
+                0x0F => (byte)(quantity / 8 + (quantity % 8 == 0 ? 0 : 1)),
+                0x10 => (byte)(quantity * 2),
+                _ => 0
+            };
+            _multiWirteData = writeData;
 
             _frame = GetMultiWriteFrame();
             _crc = new byte[2];
@@ -39,15 +47,14 @@
         public RequestPacket(byte[] frame)
         {
             _frame = frame;
+            // 멀티 코일 & 레지스터 쓰기
             if (frame[1] == 0x0F || frame[1] == 0x10)
             {
                 _slaveAddr = frame[0];
                 _functionCode = frame[1];
-                _data = new byte[frame.Length - 7];
-                Array.Copy(frame, 2, _data, 0, _data.Length);
-                _byteCount = frame[frame.Length - 4];
-                _writeData = new byte[frame.Length - 7 - 1];
-                Array.Copy(frame, 3 + _data.Length, _writeData, 0, _writeData.Length);
+                _data = frame.Skip(2).Take(4).ToArray();
+                _byteCount = frame[6];
+                _multiWirteData = frame.Skip(6).Take(_byteCount).ToArray();
                 _crc = new byte[2];
                 Array.Copy(frame, frame.Length - 2, _crc, 0, 2);
             }
@@ -79,14 +86,14 @@
 
         private byte[] GetMultiWriteFrame()
         {
-            byte[] frame = new byte[1 + 1 + _data.Length + 1 + _writeData.Length + 2]; // SlaveAddr + FunctionCode + Data + CRC
+            byte[] frame = new byte[1 + 1 + _data.Length + 1 + _multiWirteData.Length + 2]; // SlaveAddr + FunctionCode + Data + CRC
 
             frame[0] = _slaveAddr;
             frame[1] = _functionCode;
             Array.Copy(_data, 0, frame, 2, _data.Length);
 
             frame[2 + _data.Length] = _byteCount;
-            Array.Copy(_writeData, 0, frame, 3 + _data.Length, _writeData.Length);
+            Array.Copy(_multiWirteData, 0, frame, 3 + _data.Length, _multiWirteData.Length);
 
             ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
             frame[frame.Length - 2] = (byte)(crc & 0xFF);
@@ -120,6 +127,18 @@
             set { _data = value; }
         }
 
+        public byte ByteCount
+        {
+            get { return _byteCount; }
+            set { _byteCount = value; }
+        }
+
+        public byte[] MultiWriteData
+        {
+            get { return _multiWirteData; }
+            set { _multiWirteData = value; }
+        }
+
         public byte[] Crc
         {
             get { return _crc; }
@@ -133,7 +152,7 @@
             private byte _functionCode;
             private byte[] _data;
             private byte _byteCount;
-            private byte[] _writeData;
+            private byte[] _multiWriteData;
 
             public RequestPacketBuilder SetSlaveAddr(byte slaveAddr)
             {
@@ -153,22 +172,16 @@
                 return this;
             }
 
-            public RequestPacketBuilder SetByteCount(byte byteCount)
+            public RequestPacketBuilder SetWriteData(byte[] multiWriteData)
             {
-                _byteCount = byteCount;
-                return this;
-            }
-
-            public RequestPacketBuilder SetWriteData(byte[] writeData)
-            {
-                _writeData = writeData;
+                _multiWriteData = multiWriteData;
                 return this;
             }
 
             public RequestPacket Build()
             {
                 return _functionCode == 0x0F || _functionCode == 0x10 ?
-                    new RequestPacket(_slaveAddr, _functionCode, _data, _byteCount, _writeData) :
+                    new RequestPacket(_slaveAddr, _functionCode, _data, _multiWriteData) :
                     new RequestPacket(_slaveAddr, _functionCode, _data);
             }
         }

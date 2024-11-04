@@ -54,7 +54,7 @@ namespace ModBusSimSlave
             return new ResponsePacket.ResponsePacketBuilder()
                 .SetSlaveAddr(packet.SlaveAddr)
                 .SetFunctionCode(packet.FunctionCode)
-                .SetDataLength(byteCount)
+                .SetByteCount(byteCount)
                 .SetData(data)
                 .Build();
         }
@@ -76,7 +76,7 @@ namespace ModBusSimSlave
             return new ResponsePacket.ResponsePacketBuilder()
                 .SetSlaveAddr(packet.SlaveAddr)
                 .SetFunctionCode(packet.FunctionCode)
-                .SetDataLength(byteCount)
+                .SetByteCount(byteCount)
                 .SetData(data)
                 .Build();
         }
@@ -99,7 +99,7 @@ namespace ModBusSimSlave
             return new ResponsePacket.ResponsePacketBuilder()
                 .SetSlaveAddr(packet.SlaveAddr)
                 .SetFunctionCode(packet.FunctionCode)
-                .SetDataLength(byteCount)
+                .SetByteCount(byteCount)
                 .SetData(data)
                 .Build();
         }
@@ -122,7 +122,7 @@ namespace ModBusSimSlave
             return new ResponsePacket.ResponsePacketBuilder()
                 .SetSlaveAddr(packet.SlaveAddr)
                 .SetFunctionCode(packet.FunctionCode)
-                .SetDataLength(byteCount)
+                .SetByteCount(byteCount)
                 .SetData(data)
                 .Build();
         }
@@ -184,8 +184,8 @@ namespace ModBusSimSlave
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
 
-            byte byteCount = packet.Data[4];
-            byte[] writeData = packet.Data.Skip(5).ToArray();
+            byte byteCount = packet.ByteCount;
+            byte[] writeData = packet.MultiWriteData;
 
             // 쓰기 데이터를 레지스터에 쓰기
             for (int i = 0; i < quantity; i++)
