@@ -77,6 +77,7 @@
             slaveTextBox.Name = "slaveTextBox";
             slaveTextBox.Size = new Size(117, 23);
             slaveTextBox.TabIndex = 3;
+            slaveTextBox.KeyPress += TextBox_KeyPress;
             // 
             // addressTextBox
             // 
@@ -84,6 +85,7 @@
             addressTextBox.Name = "addressTextBox";
             addressTextBox.Size = new Size(117, 23);
             addressTextBox.TabIndex = 5;
+            addressTextBox.KeyPress += TextBox_KeyPress;
             // 
             // dataTextBox
             // 
@@ -92,6 +94,7 @@
             dataTextBox.Size = new Size(117, 23);
             dataTextBox.TabIndex = 6;
             dataTextBox.TextChanged += dataTextBox_TextChanged;
+            dataTextBox.KeyPress += TextBox_KeyPress;
             // 
             // txBtn
             // 
@@ -165,6 +168,7 @@
             quantityTxBox.Name = "quantityTxBox";
             quantityTxBox.Size = new Size(117, 23);
             quantityTxBox.TabIndex = 13;
+            quantityTxBox.KeyPress += TextBox_KeyPress;
             // 
             // MainForm
             // 

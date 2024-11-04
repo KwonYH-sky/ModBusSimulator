@@ -5,7 +5,7 @@
         private byte[] _frame;
         private byte _slaveAddr;
         private byte _functionCode;
-        private byte _dataLength;
+        private byte _byteCount;
         private byte[] _data;
         private byte[] _crc;
 
@@ -13,7 +13,7 @@
         {
             _slaveAddr = slaveArr;
             _functionCode = functionCode;
-            _dataLength = dataLength;
+            _byteCount = dataLength;
             _data = data;
 
             _frame = GetReadFrame();
@@ -37,11 +37,19 @@
             _frame = frame;
             _slaveAddr = frame[0];
             _functionCode = frame[1];
-            _dataLength = frame[2];
-            _data = new byte[_dataLength];
-            Array.Copy(frame, 3, _data, 0, _dataLength);
+
+            if (_functionCode is 0x0F or 0x10)
+            {
+                _data = frame.Skip(2).Take(4).ToArray();
+                _crc = frame.Skip(6).Take(2).ToArray();
+                return;
+            }
+
+            _byteCount = frame[2];
+            _data = new byte[_byteCount];
+            Array.Copy(frame, 3, _data, 0, _byteCount);
             _crc = new byte[2];
-            Array.Copy(frame, 3 + _dataLength, _crc, 0, 2);
+            Array.Copy(frame, 3 + _byteCount, _crc, 0, 2);
         }
 
         private byte[] GetReadFrame()
@@ -51,7 +59,7 @@
 
             frame[0] = _slaveAddr;
             frame[1] = _functionCode;
-            frame[2] = _dataLength;
+            frame[2] = _byteCount;
             Array.Copy(_data, 0, frame, 3, _data.Length);
 
             ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
@@ -93,10 +101,10 @@
             set { _functionCode = value; }
         }
 
-        public byte DataLength
+        public byte ByteCount
         {
-            get { return _dataLength; }
-            set { _dataLength = value; }
+            get { return _byteCount; }
+            set { _byteCount = value; }
         }
 
         public byte[] Data
@@ -115,7 +123,7 @@
         {
             private byte _slaveAddr;
             private byte _functionCode;
-            private byte _dataLength;
+            private byte _byteCount;
             private byte[] _data;
 
             public ResponsePacketBuilder SetSlaveAddr(byte slaveAddr)
@@ -130,9 +138,9 @@
                 return this;
             }
 
-            public ResponsePacketBuilder SetDataLength(byte dataLength)
+            public ResponsePacketBuilder SetByteCount(byte byteCount)
             {
-                _dataLength = dataLength;
+                _byteCount = byteCount;
                 return this;
             }
 
@@ -146,7 +154,7 @@
             {
                 return _functionCode == 0x05 || _functionCode == 0x06 || _functionCode == 0x0F || _functionCode == 0x10 ?
                     new ResponsePacket(_slaveAddr, _functionCode, _data) :
-                    new ResponsePacket(_slaveAddr, _functionCode, _dataLength, _data);
+                    new ResponsePacket(_slaveAddr, _functionCode, _byteCount, _data);
             }
         }
     }

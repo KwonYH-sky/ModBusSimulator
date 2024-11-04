@@ -1,5 +1,6 @@
 using System.IO.Ports;
 using System.Text;
+using System.Text.RegularExpressions;
 using ModBusSimMaster.Data;
 
 namespace ModBusSimMaster
@@ -132,28 +133,47 @@ namespace ModBusSimMaster
 
         private void txBtn_Click(object sender, EventArgs e)
         {
+            CreatePacket(out RequestPacket packet);
+            byte[] frame = packet.Frame;
+            serialPort.Write(frame, 0, frame.Length);
+        }
+
+        private void CreatePacket(out RequestPacket packet)
+        {
             byte slaveAddr = Convert.ToByte(slaveTextBox.Text, 16);
             byte functionCode = SelFuncCodeToByte();
-            ushort address = Convert.ToUInt16(addressTextBox.Text, 16);
+            byte[] address = BitConverter.GetBytes(Convert.ToInt16(addressTextBox.Text, 16))
+                .Reverse()
+                .ToArray();
 
-            // TODO: 수량, 데이터 functionCode에 따라 다르게 처리
+            byte[] quantity = string.IsNullOrEmpty(quantityTxBox.Text) ? [] :
+                BitConverter.GetBytes(Convert.ToInt16(quantityTxBox.Text, 16))
+                    .Reverse()
+                    .ToArray();
+
+            byte[] writeData = string.IsNullOrEmpty(dataTextBox.Text) ? [] :
+                Enumerable.Range(0, dataTextBox.Text.Length)
+                    .Where(x => x % 2 == 0)
+                    .Select(x => Convert.ToByte(dataTextBox.Text.Substring(x, 2), 16))
+                    .ToArray();
+
             // 0x01, 0x02, 0x03, 0x04: 수량
             // 0x05, 0x06: 데이터
             // 0x0F, 0x10: 수량, 데이터
-            ushort quantity = Convert.ToUInt16(quantityTxBox.Text, 16);
-            ushort data = dataTextBox.Enabled ? Convert.ToUInt16(dataTextBox.Text, 16) : quantity;
+            byte[] data = SelFuncCodeToByte() switch
+            {
+                0x01 or 0x02 or 0x03 or 0x04 or 0x0F or 0x10 => [.. address, .. quantity],
+                0x05 or 0x06 => [.. address, .. writeData],
+                _ => [],
+            };
 
-            // TODO: RequestPacket FunctionCode에 따라 다르게 생성
-            var packet = new RequestPacket.RequestPacketBuilder()
+            RequestPacket.RequestPacketBuilder builder = new RequestPacket.RequestPacketBuilder()
                 .SetSlaveAddr(slaveAddr)
                 .SetFunctionCode(functionCode)
-                .SetData([
-                    (byte)(address >> 8), (byte)(address & 0xFF), (byte)(data >> 8), (byte)(data & 0xFF)
-                ])
-                .Build();
+                .SetData(data);
+            if (functionCode == 0x0F || functionCode == 0x10) builder.SetWriteData(writeData);
 
-            byte[] frame = packet.Frame;
-            serialPort.Write(frame, 0, frame.Length);
+            packet = builder.Build();
         }
 
         private byte SelFuncCodeToByte()
@@ -170,13 +190,26 @@ namespace ModBusSimMaster
                 7 => 0x10,
                 _ => 0x01,
             };
-            ;
         }
 
         private void dataTextBox_TextChanged(object sender, EventArgs e)
         {
-            // TODO: dataTextBox의 값이 0xFFFF를 넘어가면 0xFFFF로 설정
-            // 멀티 쓰기 일 경우 byteCount를 넘어가면 byteCount로 설정
+
+            byte funcCode = SelFuncCodeToByte();
+            byte byteCount = 4;
+
+            if (funcCode is 0x0F or 0x10)
+            {
+                ushort quantity = Convert.ToUInt16(quantityTxBox.Text, 16);
+                byteCount = (byte)(funcCode == 0x0F ?
+                    (quantity / 8 + (quantity % 8 == 0 ? 0 : 1)) :
+                    quantity * 2);
+            }
+
+            if (dataTextBox.Text.Length > byteCount)
+            {
+                dataTextBox.Text = new string('F', byteCount);
+            }
         }
 
         private void selFuncCode_SelectedIndexChanged(object sender, EventArgs e)
@@ -200,6 +233,20 @@ namespace ModBusSimMaster
             {
                 quantityTxBox.Enabled = true;
                 dataTextBox.Enabled = true;
+            }
+        }
+
+        private void TextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            ValidateHexInput(e);
+        }
+
+        private static void ValidateHexInput(KeyPressEventArgs e)
+        {
+            string pattern = @"\b[0-9a-fA-F]+\b";
+            if (!Regex.IsMatch(e.KeyChar.ToString(), pattern) && !char.IsControl(e.KeyChar))
+            {
+                e.Handled = true;
             }
         }
     }
