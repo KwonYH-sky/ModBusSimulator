@@ -11,9 +11,9 @@ namespace ModBusSimSlave
             VirtualDevice = device;
         }
 
-        public ResponsePacket? Response(RequestPacket requestPacket)
+        public ResponsePacket Response(RequestPacket requestPacket)
         {
-            if (requestPacket.SlaveAddr != VirtualDevice.SlaveID) return null;
+            if (requestPacket.SlaveAddr != VirtualDevice.SlaveID) return ErrorResponse(0x02, requestPacket);
 
             Console.WriteLine("수신 데이터");
             Console.WriteLine($"SlaveAddr: {requestPacket.SlaveAddr} FunctioanCode: {requestPacket.FunctionCode}");
@@ -33,7 +33,7 @@ namespace ModBusSimSlave
                 0x06 => WriteSingleRegister(requestPacket),
                 0x0F => WriteMultipleCoils(requestPacket),
                 0x10 => WriteMultipleRegisters(requestPacket),
-                _ => null,
+                _ => ErrorResponse(0x01, requestPacket),
             };
         }
 
@@ -132,6 +132,9 @@ namespace ModBusSimSlave
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort data = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
 
+            if (data != 0xFF00 && data != 0x0000) 
+                return ErrorResponse(0x03, packet);
+            
             // 0xFF00이면 true, 0x0000이면 false
             VirtualDevice.Coils[address] = data == 0xFF00;
 
@@ -161,8 +164,11 @@ namespace ModBusSimSlave
         {
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
-            byte byteCount = packet.Data[4];
-            byte[] writeData = packet.Data.Skip(5).ToArray();
+            byte byteCount = packet.ByteCount;
+            byte[] writeData = packet.MultiWriteData;
+
+            if (byteCount != writeData.Length || VirtualDevice.Coils.Length < quantity) 
+                return ErrorResponse(0x03, packet);
 
             // 쓰기 데이터를 코일에 쓰기
             for (int i = 0; i < quantity; i++)
@@ -187,6 +193,9 @@ namespace ModBusSimSlave
             byte byteCount = packet.ByteCount;
             byte[] writeData = packet.MultiWriteData;
 
+            if (byteCount != writeData.Length || VirtualDevice.HoldingRegisters.Length < quantity)
+                return ErrorResponse(0x03, packet);
+
             // 쓰기 데이터를 레지스터에 쓰기
             for (int i = 0; i < quantity; i++)
             {
@@ -198,6 +207,15 @@ namespace ModBusSimSlave
                 .SetSlaveAddr(packet.SlaveAddr)
                 .SetFunctionCode(packet.FunctionCode)
                 .SetData(packet.Data.Take(4).ToArray())
+                .Build();
+        }
+
+        private ResponsePacket ErrorResponse(byte errorCode, RequestPacket packet)
+        {
+            return new ResponsePacket.ResponsePacketBuilder()
+                .SetSlaveAddr(packet.SlaveAddr)
+                .SetFunctionCode((byte)(packet.FunctionCode | 0x80))
+                .SetData([errorCode])
                 .Build();
         }
 

@@ -51,16 +51,16 @@ namespace ModBusSimSlave
 
         private void ProcessPacketBuffer(byte[] bytes)
         {
-            lock(packBufferLock)
+            lock (packBufferLock)
             {
                 packetBuffer.AddRange(bytes);
-                while(packetBuffer.Count >= 8)
+                while (packetBuffer.Count >= 8)
                 {
-                    int expectedLength = PacketHelpers.GetExpectedRequestPKLength(packetBuffer.ToArray());
+                    int expectedLength = PacketHelpers.GetExpectedRequestPKLength([.. packetBuffer]);
 
                     if (packetBuffer.Count < expectedLength) break;
 
-                    byte[] packetBytes = packetBuffer.GetRange(0, expectedLength).ToArray();
+                    byte[] packetBytes = [.. packetBuffer.GetRange(0, expectedLength)];
 
                     if (PacketHelpers.CheckCRC(packetBytes))
                     {
@@ -71,25 +71,18 @@ namespace ModBusSimSlave
                         packet.Data.ToList().ForEach(e => Debug.Write($"{e:X2} "));
                         Debug.WriteLine("");
 
-                        ResponsePacket? response = service.Response(packet);
+                        ResponsePacket response = service.Response(packet);
                         byte[] frame;
 
-                        if (response == null)
-                        {
-                            Debug.WriteLine("응답 데이터 없음");
-                            frame = [1];
-                        }
-                        else
-                        {
-                            frame = response.Frame;
-                            Debug.WriteLine("응답 데이터");
-                            frame.ToList().ForEach(e => Debug.Write($"{e:X2} "));
-                            Debug.WriteLine("");
-                        }
+                        frame = response.Frame;
+                        Debug.WriteLine("응답 데이터");
+                        frame.ToList().ForEach(e => Debug.Write($"{e:X2} "));
+                        Debug.WriteLine("");
 
                         seriallPort.Write(frame, 0, frame.Length);
                         packetBuffer.RemoveRange(0, expectedLength);
-                    } else
+                    }
+                    else
                     {
                         Console.Error.WriteLine("CRC 불일치");
                         packetBuffer.RemoveAt(0);

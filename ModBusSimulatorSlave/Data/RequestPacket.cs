@@ -1,5 +1,11 @@
 ﻿namespace ModBusSimSlave.Data
 {
+    /**
+     * Request Packet 요청 패킷
+     * Function Code 15, 16을 제외한 모든 코드에서는 총 8바이트 고정 크기를 가짐
+     * 15, 16 코드에서는 수량과 코일 혹은 레지스터에 따라 Byte Count와 Write Data의 길이가 달라짐
+     * 수량 및 바이트 카운터에 따라 패킷 검수 과정
+     */
     class RequestPacket
     {
         private byte[] _frame;
@@ -38,12 +44,18 @@
             };
             _multiWirteData = writeData;
 
+            if (_multiWirteData.Length != _byteCount)
+                throw new ArgumentException($"바이트 크기에 맞지 않는 데이터 들어옴\n바이크 크기: {_byteCount}, 들어온 데이터 크기: {_multiWirteData.Length}");
+
             _frame = GetMultiWriteFrame();
             _crc = new byte[2];
             Array.Copy(_frame, _frame.Length - 2, _crc, 0, 2);
 
         }
 
+        /**
+         * 외부에서 받아온 패킷을 가공하기 위한 생성자
+         */
         public RequestPacket(byte[] frame)
         {
             _frame = frame;
@@ -54,7 +66,7 @@
                 _functionCode = frame[1];
                 _data = frame.Skip(2).Take(4).ToArray();
                 _byteCount = frame[6];
-                _multiWirteData = frame.Skip(6).Take(_byteCount).ToArray();
+                _multiWirteData = frame.Skip(7).Take(_byteCount).ToArray();
                 _crc = new byte[2];
                 Array.Copy(frame, frame.Length - 2, _crc, 0, 2);
             }
@@ -103,6 +115,9 @@
         }
 
 
+        /**
+         * Getter & Setter
+         */
         public byte[] Frame
         {
             get { return _frame; }
@@ -146,6 +161,9 @@
         }
 
 
+        /**
+         * 패킷 빌더
+         */
         public class RequestPacketBuilder
         {
             private byte _slaveAddr;
