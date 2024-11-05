@@ -133,9 +133,15 @@ namespace ModBusSimMaster
 
         private void txBtn_Click(object sender, EventArgs e)
         {
-            CreatePacket(out RequestPacket packet);
-            byte[] frame = packet.Frame;
-            serialPort.Write(frame, 0, frame.Length);
+            try
+            {
+                CreatePacket(out RequestPacket packet);
+                byte[] frame = packet.Frame;
+                serialPort.Write(frame, 0, frame.Length);
+            } catch(Exception excep)
+            {
+                MessageBox.Show(excep.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void CreatePacket(out RequestPacket packet)
@@ -154,7 +160,7 @@ namespace ModBusSimMaster
             byte[] writeData = string.IsNullOrEmpty(dataTextBox.Text) ? [] :
                 Enumerable.Range(0, dataTextBox.Text.Length)
                     .Where(x => x % 2 == 0)
-                    .Select(x => Convert.ToByte(dataTextBox.Text.Substring(x, 2), 16))
+                    .Select(x => Convert.ToByte(dataTextBox.Text.Substring(x, Math.Min(2, dataTextBox.Text.Length - x)), 16))
                     .ToArray();
 
             // 0x01, 0x02, 0x03, 0x04: 수량
@@ -172,6 +178,7 @@ namespace ModBusSimMaster
                 .SetFunctionCode(functionCode)
                 .SetData(data);
             if (functionCode == 0x0F || functionCode == 0x10) builder.SetWriteData(writeData);
+
 
             packet = builder.Build();
         }
@@ -196,7 +203,7 @@ namespace ModBusSimMaster
         {
 
             byte funcCode = SelFuncCodeToByte();
-            byte byteCount = 4;
+            byte byteCount = 2;
 
             if (funcCode is 0x0F or 0x10)
             {
@@ -204,11 +211,6 @@ namespace ModBusSimMaster
                 byteCount = (byte)(funcCode == 0x0F ?
                     (quantity / 8 + (quantity % 8 == 0 ? 0 : 1)) :
                     quantity * 2);
-            }
-
-            if (dataTextBox.Text.Length > byteCount)
-            {
-                dataTextBox.Text = new string('F', byteCount);
             }
         }
 
