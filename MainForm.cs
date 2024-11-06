@@ -113,14 +113,21 @@ namespace ModBusSimMaster
                 serialPort.Close();
                 SetControls(false);
                 connectBtn.Text = "열기";
+                return;
             }
-            else
+
+            try
             {
                 serialPort.PortName = selPortNm.Text;
                 serialPort.Open();
                 SetControls(true);
                 connectBtn.Text = "닫기";
             }
+            catch (Exception excep)
+            {
+                MessageBox.Show(excep.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -199,6 +206,9 @@ namespace ModBusSimMaster
             };
         }
 
+        /**
+         * Byte Count에 따라 맞는 데이터 크기 조정
+         */
         private void dataTextBox_TextChanged(object sender, EventArgs e)
         {
 
@@ -211,6 +221,8 @@ namespace ModBusSimMaster
                 byteCount = (byte)(funcCode == 0x0F ?
                     (quantity / 8 + (quantity % 8 == 0 ? 0 : 1)) :
                     quantity * 2);
+
+
             }
         }
 

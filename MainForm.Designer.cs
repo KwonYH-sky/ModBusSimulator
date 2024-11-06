@@ -42,20 +42,24 @@
             selFuncCode = new ComboBox();
             quantityLabel = new Label();
             quantityTxBox = new TextBox();
+            inputGroupBox = new GroupBox();
+            outPutGroupBox = new GroupBox();
+            inputGroupBox.SuspendLayout();
+            outPutGroupBox.SuspendLayout();
             SuspendLayout();
             // 
             // selPortNm
             // 
             selPortNm.DropDownStyle = ComboBoxStyle.DropDownList;
             selPortNm.FormattingEnabled = true;
-            selPortNm.Location = new Point(12, 12);
+            selPortNm.Location = new Point(12, 25);
             selPortNm.Name = "selPortNm";
             selPortNm.Size = new Size(121, 23);
             selPortNm.TabIndex = 0;
             // 
             // connectBtn
             // 
-            connectBtn.Location = new Point(139, 11);
+            connectBtn.Location = new Point(139, 24);
             connectBtn.Name = "connectBtn";
             connectBtn.Size = new Size(75, 23);
             connectBtn.TabIndex = 1;
@@ -65,15 +69,16 @@
             // 
             // dataRxTextBox
             // 
-            dataRxTextBox.Location = new Point(232, 12);
+            dataRxTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
+            dataRxTextBox.Location = new Point(6, 22);
             dataRxTextBox.Name = "dataRxTextBox";
-            dataRxTextBox.Size = new Size(264, 260);
+            dataRxTextBox.Size = new Size(293, 288);
             dataRxTextBox.TabIndex = 2;
             dataRxTextBox.Text = "";
             // 
             // slaveTextBox
             // 
-            slaveTextBox.Location = new Point(97, 62);
+            slaveTextBox.Location = new Point(97, 75);
             slaveTextBox.Name = "slaveTextBox";
             slaveTextBox.Size = new Size(117, 23);
             slaveTextBox.TabIndex = 3;
@@ -81,7 +86,7 @@
             // 
             // addressTextBox
             // 
-            addressTextBox.Location = new Point(97, 120);
+            addressTextBox.Location = new Point(97, 133);
             addressTextBox.Name = "addressTextBox";
             addressTextBox.Size = new Size(117, 23);
             addressTextBox.TabIndex = 5;
@@ -89,7 +94,7 @@
             // 
             // dataTextBox
             // 
-            dataTextBox.Location = new Point(97, 178);
+            dataTextBox.Location = new Point(97, 191);
             dataTextBox.Name = "dataTextBox";
             dataTextBox.Size = new Size(117, 23);
             dataTextBox.TabIndex = 6;
@@ -98,7 +103,7 @@
             // 
             // txBtn
             // 
-            txBtn.Location = new Point(12, 228);
+            txBtn.Location = new Point(12, 266);
             txBtn.Name = "txBtn";
             txBtn.Size = new Size(202, 44);
             txBtn.TabIndex = 7;
@@ -109,7 +114,7 @@
             // slaveIdLabel
             // 
             slaveIdLabel.AutoSize = true;
-            slaveIdLabel.Location = new Point(12, 62);
+            slaveIdLabel.Location = new Point(12, 75);
             slaveIdLabel.Name = "slaveIdLabel";
             slaveIdLabel.Size = new Size(67, 15);
             slaveIdLabel.TabIndex = 8;
@@ -118,7 +123,7 @@
             // funcCodeLabel
             // 
             funcCodeLabel.AutoSize = true;
-            funcCodeLabel.Location = new Point(12, 94);
+            funcCodeLabel.Location = new Point(12, 107);
             funcCodeLabel.Name = "funcCodeLabel";
             funcCodeLabel.Size = new Size(61, 15);
             funcCodeLabel.TabIndex = 9;
@@ -127,7 +132,7 @@
             // dataLabel
             // 
             dataLabel.AutoSize = true;
-            dataLabel.Location = new Point(12, 181);
+            dataLabel.Location = new Point(12, 194);
             dataLabel.Name = "dataLabel";
             dataLabel.Size = new Size(43, 15);
             dataLabel.TabIndex = 11;
@@ -136,7 +141,7 @@
             // addressLabel
             // 
             addressLabel.AutoSize = true;
-            addressLabel.Location = new Point(12, 123);
+            addressLabel.Location = new Point(12, 136);
             addressLabel.Name = "addressLabel";
             addressLabel.Size = new Size(31, 15);
             addressLabel.TabIndex = 10;
@@ -147,7 +152,7 @@
             selFuncCode.DropDownStyle = ComboBoxStyle.DropDownList;
             selFuncCode.FormattingEnabled = true;
             selFuncCode.Items.AddRange(new object[] { "01 - Read Coils", "02 - Read Discrete Inputs", "03 - Read Holding Registers", "04 - Read Input Registers", "05 - Write Single Coil", "06 - Write Single Register", "15 - Write Multiple Coils", "16 - Write Multiple Registers" });
-            selFuncCode.Location = new Point(97, 91);
+            selFuncCode.Location = new Point(97, 104);
             selFuncCode.Name = "selFuncCode";
             selFuncCode.Size = new Size(117, 23);
             selFuncCode.TabIndex = 12;
@@ -156,7 +161,7 @@
             // quantityLabel
             // 
             quantityLabel.AutoSize = true;
-            quantityLabel.Location = new Point(12, 152);
+            quantityLabel.Location = new Point(12, 165);
             quantityLabel.Name = "quantityLabel";
             quantityLabel.Size = new Size(31, 15);
             quantityLabel.TabIndex = 14;
@@ -164,37 +169,59 @@
             // 
             // quantityTxBox
             // 
-            quantityTxBox.Location = new Point(97, 149);
+            quantityTxBox.Location = new Point(97, 162);
             quantityTxBox.Name = "quantityTxBox";
             quantityTxBox.Size = new Size(117, 23);
             quantityTxBox.TabIndex = 13;
             quantityTxBox.KeyPress += TextBox_KeyPress;
             // 
+            // inputGroupBox
+            // 
+            inputGroupBox.Controls.Add(quantityLabel);
+            inputGroupBox.Controls.Add(txBtn);
+            inputGroupBox.Controls.Add(quantityTxBox);
+            inputGroupBox.Controls.Add(dataTextBox);
+            inputGroupBox.Controls.Add(selFuncCode);
+            inputGroupBox.Controls.Add(selPortNm);
+            inputGroupBox.Controls.Add(dataLabel);
+            inputGroupBox.Controls.Add(connectBtn);
+            inputGroupBox.Controls.Add(addressLabel);
+            inputGroupBox.Controls.Add(slaveTextBox);
+            inputGroupBox.Controls.Add(funcCodeLabel);
+            inputGroupBox.Controls.Add(addressTextBox);
+            inputGroupBox.Controls.Add(slaveIdLabel);
+            inputGroupBox.Location = new Point(12, 0);
+            inputGroupBox.Name = "inputGroupBox";
+            inputGroupBox.Size = new Size(226, 316);
+            inputGroupBox.TabIndex = 15;
+            inputGroupBox.TabStop = false;
+            inputGroupBox.Text = "입력";
+            // 
+            // outPutGroupBox
+            // 
+            outPutGroupBox.Controls.Add(dataRxTextBox);
+            outPutGroupBox.Location = new Point(244, 0);
+            outPutGroupBox.Name = "outPutGroupBox";
+            outPutGroupBox.Size = new Size(305, 316);
+            outPutGroupBox.TabIndex = 15;
+            outPutGroupBox.TabStop = false;
+            outPutGroupBox.Text = "출력";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(508, 284);
-            Controls.Add(quantityLabel);
-            Controls.Add(quantityTxBox);
-            Controls.Add(selFuncCode);
-            Controls.Add(dataLabel);
-            Controls.Add(addressLabel);
-            Controls.Add(funcCodeLabel);
-            Controls.Add(slaveIdLabel);
-            Controls.Add(txBtn);
-            Controls.Add(dataTextBox);
-            Controls.Add(addressTextBox);
-            Controls.Add(slaveTextBox);
-            Controls.Add(dataRxTextBox);
-            Controls.Add(connectBtn);
-            Controls.Add(selPortNm);
+            ClientSize = new Size(561, 328);
+            Controls.Add(inputGroupBox);
+            Controls.Add(outPutGroupBox);
             Name = "MainForm";
             Text = "ModbusMaster";
             FormClosing += MainForm_FormClosing;
             Load += MainForm_Load;
+            inputGroupBox.ResumeLayout(false);
+            inputGroupBox.PerformLayout();
+            outPutGroupBox.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
@@ -213,5 +240,7 @@
         private ComboBox selFuncCode;
         private Label quantityLabel;
         private TextBox quantityTxBox;
+        private GroupBox inputGroupBox;
+        private GroupBox outPutGroupBox;
     }
 }
