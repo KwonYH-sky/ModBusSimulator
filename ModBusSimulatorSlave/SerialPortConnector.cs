@@ -6,14 +6,14 @@ namespace ModBusSimSlave
 {
     public class SerialPortConnector
     {
-        private SerialPort seriallPort = new();
-        private VirtualDevice device = new(1, 10, 10);
+        private readonly SerialPort seriallPort = new();
+        private Dictionary<int, VirtualDevice> vitualDeviceManagement;
         private readonly Service service;
 
         private readonly Object packBufferLock = new();
         private readonly List<byte> packetBuffer = [];
 
-        public SerialPortConnector()
+        public SerialPortConnector(Dictionary<int, VirtualDevice> management)
         {
             seriallPort.BaudRate = 115200;
             seriallPort.Parity = Parity.None;
@@ -24,14 +24,12 @@ namespace ModBusSimSlave
             seriallPort.WriteTimeout = 500;
             seriallPort.DataReceived += DataReceivedHandler;
 
-            device.InputRegisters[0] = Convert.ToUInt16(DateTime.Now.Year);
-            device.InputRegisters[1] = Convert.ToUInt16(DateTime.Now.Month);
-            device.InputRegisters[2] = Convert.ToUInt16(DateTime.Now.Day);
-            device.InputRegisters[3] = Convert.ToUInt16(DateTime.Now.Hour);
-            device.InputRegisters[4] = Convert.ToUInt16(DateTime.Now.Minute);
-            device.InputRegisters[5] = Convert.ToUInt16(DateTime.Now.Second);
+            vitualDeviceManagement = management;
 
-            service = new Service(device);
+            VirtualDevice device = new(1, 10, 10);
+            vitualDeviceManagement.Add(1, device);
+
+            service = new Service(vitualDeviceManagement);
         }
 
         private async void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -72,9 +70,8 @@ namespace ModBusSimSlave
                         Debug.WriteLine("");
 
                         ResponsePacket response = service.Response(packet);
-                        byte[] frame;
+                        byte[] frame = response.Frame;
 
-                        frame = response.Frame;
                         Debug.WriteLine("응답 데이터");
                         frame.ToList().ForEach(e => Debug.Write($"{e:X2} "));
                         Debug.WriteLine("");

@@ -90,8 +90,8 @@
             Array.Copy(_data, 0, frame, 2, _data.Length);
 
             ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
-            frame[frame.Length - 2] = (byte)(crc & 0xFF);
-            frame[frame.Length - 1] = (byte)(crc >> 8);
+            frame[^2] = (byte)(crc & 0xFF);
+            frame[^1] = (byte)(crc >> 8);
 
             return frame;
         }
@@ -108,8 +108,8 @@
             Array.Copy(_multiWirteData, 0, frame, 3 + _data.Length, _multiWirteData.Length);
 
             ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
-            frame[frame.Length - 2] = (byte)(crc & 0xFF);
-            frame[frame.Length - 1] = (byte)(crc >> 8);
+            frame[^2] = (byte)(crc & 0xFF);
+            frame[^1] = (byte)(crc >> 8);
 
             return frame;
         }

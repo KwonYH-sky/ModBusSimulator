@@ -4,23 +4,20 @@ namespace ModBusSimSlave
 {
     class Service
     {
-        private VirtualDevice VirtualDevice { get; set; }
+        public Dictionary<int, VirtualDevice> VitualDeviceManagement { get;}
+        private VirtualDevice VirtualDevice;
 
-        public Service(VirtualDevice device)
+        public Service(Dictionary<int, VirtualDevice> management)
         {
-            VirtualDevice = device;
+            VitualDeviceManagement = management;
         }
 
         public ResponsePacket Response(RequestPacket requestPacket)
         {
-            if (requestPacket.SlaveAddr != VirtualDevice.SlaveID) return ErrorResponse(0x02, requestPacket);
+            if (!VitualDeviceManagement.ContainsKey(requestPacket.SlaveAddr)) 
+                return ErrorResponse(0x02, requestPacket);
 
-            Console.WriteLine("수신 데이터");
-            Console.WriteLine($"SlaveAddr: {requestPacket.SlaveAddr} FunctioanCode: {requestPacket.FunctionCode}");
-            Console.Write("Data: ");
-            requestPacket.Data.ToList().ForEach(e => Console.Write($"{e} "));
-            Console.WriteLine("");
-
+            VirtualDevice = VitualDeviceManagement[requestPacket.SlaveAddr];
             VirtualDevice.UpdateComunication();
 
             return requestPacket.FunctionCode switch
@@ -41,6 +38,9 @@ namespace ModBusSimSlave
         {
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
+
+            if (quantity > VirtualDevice.Coils.Length || address > VirtualDevice.Coils.Length - 1) 
+                return ErrorResponse(0x03, packet);
 
             byte byteCount = (byte)(quantity / 8 + (quantity % 8 == 0 ? 0 : 1)); // 8개의 코일을 1바이트로 표현 코일은 1비트
             byte[] data = new byte[byteCount];
@@ -64,6 +64,9 @@ namespace ModBusSimSlave
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
 
+            if (quantity > VirtualDevice.DiscreteInputs.Length || address > VirtualDevice.DiscreteInputs.Length - 1)
+                return ErrorResponse(0x03, packet);
+
             byte byteCount = (byte)(quantity / 8 + (quantity % 8 == 0 ? 0 : 1));
             byte[] data = new byte[byteCount];
 
@@ -85,6 +88,9 @@ namespace ModBusSimSlave
         {
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
+
+            if (quantity > VirtualDevice.HoldingRegisters.Length || address > VirtualDevice.HoldingRegisters.Length - 1)
+                return ErrorResponse(0x03, packet);
 
             byte byteCount = (byte)(quantity * 2); // 레지스터 하나당 2바이트
             byte[] data = new byte[byteCount];
@@ -109,6 +115,9 @@ namespace ModBusSimSlave
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort quantity = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
 
+            if (quantity > VirtualDevice.InputRegisters.Length || address > VirtualDevice.InputRegisters.Length - 1)
+                return ErrorResponse(0x03, packet);
+
             byte byteCount = (byte)(quantity * 2); // 레지스터 하나당 2바이트
             byte[] data = new byte[byteCount];
 
@@ -132,7 +141,9 @@ namespace ModBusSimSlave
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort data = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
 
-            if (data != 0xFF00 && data != 0x0000) 
+            // 잘못된 데이터 or 잘못된 주소 일 때 ErrorPacket 생성
+            // 단일 Coil 쓰기는 0xFF00 혹은 0x0000 만 사용가능
+            if ((data != 0xFF00 && data != 0x0000) || address > VirtualDevice.Coils.Length - 1) 
                 return ErrorResponse(0x03, packet);
             
             // 0xFF00이면 true, 0x0000이면 false
@@ -149,6 +160,9 @@ namespace ModBusSimSlave
         {
             ushort address = (ushort)((packet.Data[0] << 8) | packet.Data[1] & 0xFF);
             ushort data = (ushort)((packet.Data[2] << 8) | packet.Data[3] & 0xFF);
+
+            if (address > VirtualDevice.HoldingRegisters.Length - 1)
+                return ErrorResponse(0x03, packet);
 
             // 레지스터에 데이터 쓰기
             VirtualDevice.HoldingRegisters[address] = data;
