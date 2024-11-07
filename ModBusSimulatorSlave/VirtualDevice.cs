@@ -25,6 +25,7 @@
             HoldingRegisters = new ushort[registerCnt];
             InputRegisters = new ushort[registerCnt];
 
+            // 가상 장치 생성된 날짜가 읽기 전용 레지스터에 순차적으로 저장
             InputRegisters[0] = Convert.ToUInt16(DateTime.Now.Year);
             InputRegisters[1] = Convert.ToUInt16(DateTime.Now.Month);
             InputRegisters[2] = Convert.ToUInt16(DateTime.Now.Day);
@@ -32,6 +33,7 @@
             InputRegisters[4] = Convert.ToUInt16(DateTime.Now.Minute);
             InputRegisters[5] = Convert.ToUInt16(DateTime.Now.Second);
 
+            // 읽기 전용 코일에 랜덤으로 ON/OFF 설정
             for (int i = 0; i < coilCnt; i++)
             {
                 DiscreteInputs[i] = random.Next(2) == 1;

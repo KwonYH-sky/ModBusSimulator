@@ -30,7 +30,7 @@
         public static bool CheckCRC(byte[] buffer)
         {
             ushort crc = CalcCRC(buffer, 0, buffer.Length - 2);
-            return crc == (ushort)(buffer[buffer.Length - 2] | (buffer[buffer.Length - 1] << 8));
+            return crc == (ushort)(buffer[^2] | (buffer[buffer.Length - 1] << 8));
         }
 
         public static int GetExpectedRequestPKLength(byte[] buffer)

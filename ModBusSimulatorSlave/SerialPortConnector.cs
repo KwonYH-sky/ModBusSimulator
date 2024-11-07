@@ -1,19 +1,21 @@
 ﻿using ModBusSimSlave.Data;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Text;
 
 namespace ModBusSimSlave
 {
     public class SerialPortConnector
     {
         private readonly SerialPort seriallPort = new();
-        private Dictionary<int, VirtualDevice> vitualDeviceManagement;
+        private readonly Dictionary<int, VirtualDevice> vitualDeviceManagement;
+        private List<LogData> logDatas;
         private readonly Service service;
 
         private readonly Object packBufferLock = new();
         private readonly List<byte> packetBuffer = [];
 
-        public SerialPortConnector(Dictionary<int, VirtualDevice> management)
+        public SerialPortConnector(Dictionary<int, VirtualDevice> management, List<LogData> logs)
         {
             seriallPort.BaudRate = 115200;
             seriallPort.Parity = Parity.None;
@@ -25,6 +27,7 @@ namespace ModBusSimSlave
             seriallPort.DataReceived += DataReceivedHandler;
 
             vitualDeviceManagement = management;
+            logDatas = logs;
 
             VirtualDevice device = new(1, 10, 10);
             vitualDeviceManagement.Add(1, device);
@@ -60,30 +63,41 @@ namespace ModBusSimSlave
 
                     byte[] packetBytes = [.. packetBuffer.GetRange(0, expectedLength)];
 
-                    if (PacketHelpers.CheckCRC(packetBytes))
-                    {
-                        var packet = new RequestPacket(packetBytes);
-
-                        Debug.WriteLine("수신 데이터");
-                        Debug.WriteLine($"SlaveAddr: {packet.SlaveAddr} FunctioanCode: {packet.FunctionCode}");
-                        packet.Data.ToList().ForEach(e => Debug.Write($"{e:X2} "));
-                        Debug.WriteLine("");
-
-                        ResponsePacket response = service.Response(packet);
-                        byte[] frame = response.Frame;
-
-                        Debug.WriteLine("응답 데이터");
-                        frame.ToList().ForEach(e => Debug.Write($"{e:X2} "));
-                        Debug.WriteLine("");
-
-                        seriallPort.Write(frame, 0, frame.Length);
-                        packetBuffer.RemoveRange(0, expectedLength);
-                    }
-                    else
+                    if (!PacketHelpers.CheckCRC(packetBytes))
                     {
                         Console.Error.WriteLine("CRC 불일치");
                         packetBuffer.RemoveAt(0);
+                        return;
                     }
+
+                    StringBuilder sb = new();
+
+                    var packet = new RequestPacket(packetBytes);
+
+                    Debug.WriteLine("수신 데이터");
+                    Debug.WriteLine($"SlaveAddr: {packet.SlaveAddr} FunctioanCode: {packet.FunctionCode}");
+                    packet.Data.ToList().ForEach(e => Debug.Write($"{e:X2} "));
+                    Debug.WriteLine("");
+
+                    sb.Append("# 수신 데이터\n");
+                    packetBytes.ToList().ForEach(e => sb.Append($"{e:X2} "));
+                    sb.Append("\n");
+
+                    ResponsePacket response = service.Response(packet);
+                    byte[] frame = response.Frame;
+
+                    Debug.WriteLine("응답 데이터");
+                    frame.ToList().ForEach(e => Debug.Write($"{e:X2} "));
+                    Debug.WriteLine("");
+
+                    sb.Append("# 응답 데이터\n");
+                    frame.ToList().ForEach(e => sb.Append($"{e:X2} "));
+                    sb.Append("\n");
+
+                    seriallPort.Write(frame, 0, frame.Length);
+                    packetBuffer.RemoveRange(0, expectedLength);
+
+                    logDatas.Add(new LogData(sb.ToString()));
 
                 }
             }
@@ -113,9 +127,6 @@ namespace ModBusSimSlave
         public static string[] GetPortNames()
         {
             string[] ports = SerialPort.GetPortNames();
-            Console.WriteLine("사용 가능한 시리얼 포트 목록");
-            ports.ToList().ForEach(port => Console.WriteLine($"{port} "));
-            Console.WriteLine("시리얼 포트 선택하기: ");
             return ports;
         }
 

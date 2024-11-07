@@ -38,6 +38,13 @@
             _slaveAddr = frame[0];
             _functionCode = frame[1];
 
+            if (_functionCode > 0x80)
+            {
+                _data = [frame[2]];
+                _crc = frame.Skip(3).Take(2).ToArray();
+                return;
+            }
+
             if (_functionCode is 0x0F or 0x10)
             {
                 _data = frame.Skip(2).Take(4).ToArray();
@@ -63,8 +70,8 @@
             Array.Copy(_data, 0, frame, 3, _data.Length);
 
             ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
-            frame[frame.Length - 2] = (byte)(crc & 0xFF);
-            frame[frame.Length - 1] = (byte)(crc >> 8);
+            frame[^2] = (byte)(crc & 0xFF);
+            frame[^1] = (byte)(crc >> 8);
 
             return frame;
         }
@@ -77,8 +84,8 @@
             Array.Copy(_data, 0, frame, 2, _data.Length);
 
             ushort crc = PacketHelpers.CalcCRC(frame, 0, frame.Length - 2);
-            frame[frame.Length - 2] = (byte)(crc & 0xFF);
-            frame[frame.Length - 1] = (byte)(crc >> 8);
+            frame[^2] = (byte)(crc & 0xFF);
+            frame[^1] = (byte)(crc >> 8);
 
             return frame;
         }
@@ -152,7 +159,7 @@
 
             public ResponsePacket Build()
             {
-                return _functionCode == 0x05 || _functionCode == 0x06 || _functionCode == 0x0F || _functionCode == 0x10 ?
+                return _functionCode == 0x05 || _functionCode == 0x06 || _functionCode == 0x0F || _functionCode == 0x10 || _functionCode > 0x80 ?
                     new ResponsePacket(_slaveAddr, _functionCode, _data) :
                     new ResponsePacket(_slaveAddr, _functionCode, _byteCount, _data);
             }
