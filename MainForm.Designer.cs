@@ -52,14 +52,14 @@
             // 
             selPortNm.DropDownStyle = ComboBoxStyle.DropDownList;
             selPortNm.FormattingEnabled = true;
-            selPortNm.Location = new Point(12, 25);
+            selPortNm.Location = new Point(12, 26);
             selPortNm.Name = "selPortNm";
-            selPortNm.Size = new Size(121, 23);
+            selPortNm.Size = new Size(97, 23);
             selPortNm.TabIndex = 0;
             // 
             // connectBtn
             // 
-            connectBtn.Location = new Point(139, 24);
+            connectBtn.Location = new Point(194, 25);
             connectBtn.Name = "connectBtn";
             connectBtn.Size = new Size(75, 23);
             connectBtn.TabIndex = 1;
@@ -72,40 +72,40 @@
             dataRxTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
             dataRxTextBox.Location = new Point(6, 22);
             dataRxTextBox.Name = "dataRxTextBox";
-            dataRxTextBox.Size = new Size(293, 288);
+            dataRxTextBox.Size = new Size(347, 324);
             dataRxTextBox.TabIndex = 2;
             dataRxTextBox.Text = "";
             // 
             // slaveTextBox
             // 
-            slaveTextBox.Location = new Point(97, 75);
+            slaveTextBox.Location = new Point(126, 75);
             slaveTextBox.Name = "slaveTextBox";
-            slaveTextBox.Size = new Size(117, 23);
+            slaveTextBox.Size = new Size(143, 23);
             slaveTextBox.TabIndex = 3;
             slaveTextBox.KeyPress += TextBox_KeyPress;
             // 
             // addressTextBox
             // 
-            addressTextBox.Location = new Point(97, 133);
+            addressTextBox.Location = new Point(126, 133);
             addressTextBox.Name = "addressTextBox";
-            addressTextBox.Size = new Size(117, 23);
+            addressTextBox.Size = new Size(143, 23);
             addressTextBox.TabIndex = 5;
             addressTextBox.KeyPress += TextBox_KeyPress;
             // 
             // dataTextBox
             // 
-            dataTextBox.Location = new Point(97, 191);
+            dataTextBox.Location = new Point(126, 191);
             dataTextBox.Name = "dataTextBox";
-            dataTextBox.Size = new Size(117, 23);
+            dataTextBox.Size = new Size(143, 23);
             dataTextBox.TabIndex = 6;
             dataTextBox.TextChanged += dataTextBox_TextChanged;
             dataTextBox.KeyPress += TextBox_KeyPress;
             // 
             // txBtn
             // 
-            txBtn.Location = new Point(12, 266);
+            txBtn.Location = new Point(12, 294);
             txBtn.Name = "txBtn";
-            txBtn.Size = new Size(202, 44);
+            txBtn.Size = new Size(274, 52);
             txBtn.TabIndex = 7;
             txBtn.Text = "보내기";
             txBtn.UseVisualStyleBackColor = true;
@@ -116,9 +116,9 @@
             slaveIdLabel.AutoSize = true;
             slaveIdLabel.Location = new Point(12, 75);
             slaveIdLabel.Name = "slaveIdLabel";
-            slaveIdLabel.Size = new Size(67, 15);
+            slaveIdLabel.Size = new Size(97, 15);
             slaveIdLabel.TabIndex = 8;
-            slaveIdLabel.Text = "슬레이브ID";
+            slaveIdLabel.Text = "슬레이브ID(HEX)";
             // 
             // funcCodeLabel
             // 
@@ -134,27 +134,27 @@
             dataLabel.AutoSize = true;
             dataLabel.Location = new Point(12, 194);
             dataLabel.Name = "dataLabel";
-            dataLabel.Size = new Size(43, 15);
+            dataLabel.Size = new Size(73, 15);
             dataLabel.TabIndex = 11;
-            dataLabel.Text = "데이터";
+            dataLabel.Text = "데이터(HEX)";
             // 
             // addressLabel
             // 
             addressLabel.AutoSize = true;
             addressLabel.Location = new Point(12, 136);
             addressLabel.Name = "addressLabel";
-            addressLabel.Size = new Size(31, 15);
+            addressLabel.Size = new Size(61, 15);
             addressLabel.TabIndex = 10;
-            addressLabel.Text = "주소";
+            addressLabel.Text = "주소(HEX)";
             // 
             // selFuncCode
             // 
             selFuncCode.DropDownStyle = ComboBoxStyle.DropDownList;
             selFuncCode.FormattingEnabled = true;
             selFuncCode.Items.AddRange(new object[] { "01 - Read Coils", "02 - Read Discrete Inputs", "03 - Read Holding Registers", "04 - Read Input Registers", "05 - Write Single Coil", "06 - Write Single Register", "15 - Write Multiple Coils", "16 - Write Multiple Registers" });
-            selFuncCode.Location = new Point(97, 104);
+            selFuncCode.Location = new Point(126, 104);
             selFuncCode.Name = "selFuncCode";
-            selFuncCode.Size = new Size(117, 23);
+            selFuncCode.Size = new Size(143, 23);
             selFuncCode.TabIndex = 12;
             selFuncCode.SelectedIndexChanged += selFuncCode_SelectedIndexChanged;
             // 
@@ -163,15 +163,15 @@
             quantityLabel.AutoSize = true;
             quantityLabel.Location = new Point(12, 165);
             quantityLabel.Name = "quantityLabel";
-            quantityLabel.Size = new Size(31, 15);
+            quantityLabel.Size = new Size(61, 15);
             quantityLabel.TabIndex = 14;
-            quantityLabel.Text = "수량";
+            quantityLabel.Text = "수량(HEX)";
             // 
             // quantityTxBox
             // 
-            quantityTxBox.Location = new Point(97, 162);
+            quantityTxBox.Location = new Point(126, 162);
             quantityTxBox.Name = "quantityTxBox";
-            quantityTxBox.Size = new Size(117, 23);
+            quantityTxBox.Size = new Size(143, 23);
             quantityTxBox.TabIndex = 13;
             quantityTxBox.KeyPress += TextBox_KeyPress;
             // 
@@ -192,7 +192,7 @@
             inputGroupBox.Controls.Add(slaveIdLabel);
             inputGroupBox.Location = new Point(12, 0);
             inputGroupBox.Name = "inputGroupBox";
-            inputGroupBox.Size = new Size(226, 316);
+            inputGroupBox.Size = new Size(292, 352);
             inputGroupBox.TabIndex = 15;
             inputGroupBox.TabStop = false;
             inputGroupBox.Text = "입력";
@@ -200,9 +200,9 @@
             // outPutGroupBox
             // 
             outPutGroupBox.Controls.Add(dataRxTextBox);
-            outPutGroupBox.Location = new Point(244, 0);
+            outPutGroupBox.Location = new Point(310, 0);
             outPutGroupBox.Name = "outPutGroupBox";
-            outPutGroupBox.Size = new Size(305, 316);
+            outPutGroupBox.Size = new Size(359, 352);
             outPutGroupBox.TabIndex = 15;
             outPutGroupBox.TabStop = false;
             outPutGroupBox.Text = "출력";
@@ -211,7 +211,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(561, 328);
+            ClientSize = new Size(681, 364);
             Controls.Add(inputGroupBox);
             Controls.Add(outPutGroupBox);
             Name = "MainForm";

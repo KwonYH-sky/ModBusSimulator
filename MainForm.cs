@@ -52,12 +52,13 @@ namespace ModBusSimMaster
             selPortNm.Enabled = !isOpen;
 
             if (isOpen)
-                ToggleInputFields();
-            else
             {
-                dataTextBox.Enabled = false;
-                quantityTxBox.Enabled = false;
+                ToggleInputFields();
+                return;
             }
+
+            dataTextBox.Enabled = false;
+            quantityTxBox.Enabled = false;
         }
 
         private async void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -75,32 +76,33 @@ namespace ModBusSimMaster
         private void ProcessPacketBuffer(byte[] bytes)
         {
             lock (packetBufferLock)
+
             {
                 packetBuffer.AddRange(bytes);
 
                 while (packetBuffer.Count >= 5)
                 {
-                    int expectedLength = PacketHelpers.GetExpectedResponsePKLength(packetBuffer.ToArray());
+
+                    int expectedLength = PacketHelpers.GetExpectedResponsePKLength([.. packetBuffer]);
 
                     if (packetBuffer.Count < expectedLength) break;
 
-                    byte[] packetBytes = packetBuffer.GetRange(0, expectedLength).ToArray();
+                    byte[] packetBytes = [.. packetBuffer.GetRange(0, expectedLength)];
 
-                    if (PacketHelpers.CheckCRC(packetBytes))
-                    {
-                        var resPacket = new ResponsePacket(packetBytes);
-                        StringBuilder sb = new();
-                        sb.Append($"SlaveID: {resPacket.SlaveAddr} FunctionCode: {resPacket.FunctionCode}\n");
-                        sb.Append("Data: ");
-                        resPacket.Data.ToList().ForEach(e => sb.Append($"{e:X2} "));
-                        dataRxTextBox.Invoke(() => dataRxTextBox.AppendText($"{sb}\n"));
-                        packetBuffer.RemoveRange(0, expectedLength);
-                    }
-                    else
+                    if (!PacketHelpers.CheckCRC(packetBytes))
                     {
                         dataRxTextBox.Invoke(() => dataRxTextBox.AppendText("CRC Error\n"));
                         packetBuffer.RemoveAt(0);
+                        return;
                     }
+
+                    var resPacket = new ResponsePacket(packetBytes);
+                    StringBuilder sb = new();
+                    sb.Append($"SlaveID: {resPacket.SlaveAddr} FunctionCode: {resPacket.FunctionCode}\n");
+                    sb.Append("Data: ");
+                    resPacket.Data.ToList().ForEach(e => sb.Append($"{e:X2} "));
+                    dataRxTextBox.Invoke(() => dataRxTextBox.AppendText($"{sb}\n"));
+                    packetBuffer.RemoveRange(0, expectedLength);
 
                 }
             }
@@ -111,6 +113,8 @@ namespace ModBusSimMaster
             if (serialPort.IsOpen)
             {
                 serialPort.Close();
+                packetBuffer.Clear();
+                dataRxTextBox.Clear();
                 SetControls(false);
                 connectBtn.Text = "열기";
                 return;
@@ -145,7 +149,8 @@ namespace ModBusSimMaster
                 CreatePacket(out RequestPacket packet);
                 byte[] frame = packet.Frame;
                 serialPort.Write(frame, 0, frame.Length);
-            } catch(Exception excep)
+            }
+            catch (Exception excep)
             {
                 MessageBox.Show(excep.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -233,16 +238,19 @@ namespace ModBusSimMaster
 
         private void ToggleInputFields()
         {
+            //읽기 관련 코드
             if (SelFuncCodeToByte() == 0x01 || SelFuncCodeToByte() == 0x02 || SelFuncCodeToByte() == 0x03 || SelFuncCodeToByte() == 0x04)
             {
                 quantityTxBox.Enabled = true;
                 dataTextBox.Enabled = false;
-            }
+            } 
+            // 쓰기 관련 코드
             else if (SelFuncCodeToByte() == 0x05 || SelFuncCodeToByte() == 0x06)
             {
                 quantityTxBox.Enabled = false;
                 dataTextBox.Enabled = true;
             }
+            // 멀티 쓰기 관련 코드
             else if (SelFuncCodeToByte() == 0x0F || SelFuncCodeToByte() == 0x10)
             {
                 quantityTxBox.Enabled = true;
