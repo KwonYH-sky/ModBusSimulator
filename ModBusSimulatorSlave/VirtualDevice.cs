@@ -18,6 +18,8 @@
         public VirtualDevice(int slaveID, int coilCnt, int registerCnt)
         {
             SlaveID = slaveID;
+            coilCnt = coilCnt < 10 ? 10 : coilCnt;
+            registerCnt = registerCnt < 10 ? 10 : registerCnt;
 
             Coils = new bool[coilCnt];
             DiscreteInputs = new bool[coilCnt];

@@ -35,7 +35,7 @@ Console.WriteLine("사용 가능한 시리얼 포트 목록");
 ports.ToList().ForEach(port => Console.Write($"{port} | "));
 
 Console.WriteLine('\n' + new String('-', 75));
-Console.WriteLine("\n시리얼 포트 선택하기: ");
+Console.Write("\n시리얼 포트 선택하기: ");
 string portName = Console.ReadLine().ToUpper();
 
 try

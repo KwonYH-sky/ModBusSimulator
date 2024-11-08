@@ -9,7 +9,7 @@ namespace ModBusSimSlave
     {
         private readonly SerialPort seriallPort = new();
         private readonly Dictionary<int, VirtualDevice> vitualDeviceManagement;
-        private List<LogData> logDatas;
+        private readonly List<LogData> logDatas;
         private readonly Service service;
 
         private readonly Object packBufferLock = new();
