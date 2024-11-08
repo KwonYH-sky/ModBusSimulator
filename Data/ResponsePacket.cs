@@ -45,7 +45,7 @@
                 return;
             }
 
-            if (_functionCode is 0x0F or 0x10)
+            if (_functionCode is 0x05 or 0x06 or 0x0F or 0x10)
             {
                 _data = frame.Skip(2).Take(4).ToArray();
                 _crc = frame.Skip(6).Take(2).ToArray();

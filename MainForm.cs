@@ -98,7 +98,7 @@ namespace ModBusSimMaster
 
                     var resPacket = new ResponsePacket(packetBytes);
                     StringBuilder sb = new();
-                    sb.Append($"SlaveID: {resPacket.SlaveAddr} FunctionCode: {resPacket.FunctionCode}\n");
+                    sb.Append($"SlaveID: {resPacket.SlaveAddr:X2} FunctionCode: {resPacket.FunctionCode:X2}\n");
                     sb.Append("Data: ");
                     resPacket.Data.ToList().ForEach(e => sb.Append($"{e:X2} "));
                     dataRxTextBox.Invoke(() => dataRxTextBox.AppendText($"{sb}\n"));
@@ -144,6 +144,12 @@ namespace ModBusSimMaster
 
         private void txBtn_Click(object sender, EventArgs e)
         {
+            if (String.IsNullOrEmpty(slaveTextBox.Text) || String.IsNullOrEmpty(addressTextBox.Text))
+            {
+                MessageBox.Show("주소를 입력하세요", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             try
             {
                 CreatePacket(out RequestPacket packet);
@@ -164,12 +170,12 @@ namespace ModBusSimMaster
                 .Reverse()
                 .ToArray();
 
-            byte[] quantity = string.IsNullOrEmpty(quantityTxBox.Text) ? [] :
+            byte[] quantity = string.IsNullOrEmpty(quantityTxBox.Text) ? [0] :
                 BitConverter.GetBytes(Convert.ToInt16(quantityTxBox.Text, 16))
                     .Reverse()
                     .ToArray();
 
-            byte[] writeData = string.IsNullOrEmpty(dataTextBox.Text) ? [] :
+            byte[] writeData = string.IsNullOrEmpty(dataTextBox.Text) ? [0] :
                 Enumerable.Range(0, dataTextBox.Text.Length)
                     .Where(x => x % 2 == 0)
                     .Select(x => Convert.ToByte(dataTextBox.Text.Substring(x, Math.Min(2, dataTextBox.Text.Length - x)), 16))
@@ -189,7 +195,8 @@ namespace ModBusSimMaster
                 .SetSlaveAddr(slaveAddr)
                 .SetFunctionCode(functionCode)
                 .SetData(data);
-            if (functionCode == 0x0F || functionCode == 0x10) builder.SetWriteData(writeData);
+            if (functionCode == 0x0F || functionCode == 0x10) 
+                builder.SetWriteData(writeData);
 
 
             packet = builder.Build();
