@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             selPortNm = new ComboBox();
             connectBtn = new Button();
             dataRxTextBox = new RichTextBox();
@@ -214,6 +215,7 @@
             ClientSize = new Size(681, 364);
             Controls.Add(inputGroupBox);
             Controls.Add(outPutGroupBox);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             Text = "ModbusMaster";
             FormClosing += MainForm_FormClosing;

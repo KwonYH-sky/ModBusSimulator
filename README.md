@@ -1,6 +1,18 @@
 # ModBus Simulator
 
+![C#](https://img.shields.io/badge/language-C%23-239120.svg?logo=c-sharp&logoColor=white)
+![WinForms](https://img.shields.io/badge/framework-WinForms-0078D6.svg?logo=windows&logoColor=white)
+![Console](https://img.shields.io/badge/application-console-lightgrey.svg?logo=windows-terminal&logoColor=white)
+
 ModBus Åë½ÅÀ» Ã¼ÇèÇØ º¼ ¼ö ÀÖ´Â °£´ÜÇÑ ½Ã¹Ä·¹ÀÌÅÍÀÔ´Ï´Ù. ModBus ÇÁ·ÎÅäÄİÀ» ÇĞ½ÀÇÏ±â À§ÇÑ ¸ñÀû¿¡¼­ °³¹ßµÈ ÀÌ ÇÁ·ÎÁ§Æ®´Â **ModBusSim Master**¿Í **ModBusSim Slave** ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀ¸·Î ±¸¼ºµÇ¾î ÀÖÀ¸¸ç, C#À» »ç¿ëÇØ °¢°¢ ±¸ÇöµÇ¾î ModBus ¿äÃ» ¹× ÀÀ´äÀÇ ¼øÈ¯ °úÁ¤À» °üÂûÇÒ ¼ö ÀÖ½À´Ï´Ù.
+
+
+#### Modbus Master
+![ModBusSimMaster](/Docs/Img/ModbusSimulatorMasterMain.png)
+
+#### Modbus Slave
+![ModBusSimSlave](./Docs/Img/ModbusSimulatorSlaveMain.png)
+
 
 ## ¸ñÂ÷
 
@@ -31,11 +43,17 @@ ModBus Åë½ÅÀ» Ã¼ÇèÇØ º¼ ¼ö ÀÖ´Â °£´ÜÇÑ ½Ã¹Ä·¹ÀÌÅÍÀÔ´Ï´Ù. ModBus ÇÁ·ÎÅäÄİÀ» ÇĞ½ÀÇ
    ```
 2. Visual Studio¿¡¼­ ¼Ö·ç¼ÇÀ» ¿­°í µÎ ÇÁ·ÎÁ§Æ®¸¦ ºôµåÇÑ ÈÄ °¢°¢ÀÇ ¾ÖÇÃ¸®ÄÉÀÌ¼Ç¿¡ ÇØ´ç COM Æ÷Æ®¸¦ ¼³Á¤ÇÕ´Ï´Ù.
 
+¶Ç´Â
+
+[Releases](https://github.com/KwonYH-sky/ModBusSimulator/releases/tag/V1.0.0.0)¿¡¼­ ¼³Ä¡ ÆÄÀÏÀ» ´Ù¿î·Îµå ÈÄ ½ÇÇàÇÕ´Ï´Ù.
+
 ## »ç¿ë ¹æ¹ı
 
 1. **Slave ¾ÖÇÃ¸®ÄÉÀÌ¼Ç**(ÄÜ¼Ö ¾Û)À» ½ÇÇàÇÏ°í Æ¯Á¤ COM Æ÷Æ®¿¡¼­ ¼ö½ÅÇÏµµ·Ï ¼³Á¤ÇÕ´Ï´Ù.
 2. **Master ¾ÖÇÃ¸®ÄÉÀÌ¼Ç**(WinForms ¾Û)À» ½ÇÇàÇÏ°í Slave¿ÍÀÇ Åë½ÅÀ» À§ÇÑ ´ëÀÀµÇ´Â COM Æ÷Æ®¸¦ ¼±ÅÃÇÕ´Ï´Ù.
 3. Master ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀÌ ModBus ÆĞÅ¶À» Slave·Î Àü¼ÛÇÏ¸é Slave´Â ÀÌ¿¡ ¸Â´Â ÀÀ´äÀ» ¹İÈ¯ÇÕ´Ï´Ù. µÎ ¾ÖÇÃ¸®ÄÉÀÌ¼Ç ¸ğµÎ¿¡ ÆĞÅ¶ Á¤º¸°¡ Ãâ·ÂµÇ¾î ModBus µ¥ÀÌÅÍ ±³È¯ °úÁ¤À» ½±°Ô ÆÄ¾ÇÇÒ ¼ö ÀÖ½À´Ï´Ù.
+
+ÀÚ¼¼ÇÑ »ç¿ë	¹æ¹ıÀº [¿©±â](./Docs/USAGE.md)¸¦ ÂüÁ¶ÇÏ¼¼¿ä.
 
 ## ¸ñÀû
 
