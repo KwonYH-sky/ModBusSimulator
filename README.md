@@ -45,7 +45,7 @@ ModBus Åë½ÅÀ» Ã¼ÇèÇØ º¼ ¼ö ÀÖ´Â °£´ÜÇÑ ½Ã¹Ä·¹ÀÌÅÍÀÔ´Ï´Ù. ModBus ÇÁ·ÎÅäÄİÀ» ÇĞ½ÀÇ
 
 ¶Ç´Â
 
-[Releases](https://github.com/KwonYH-sky/ModBusSimulator/releases/tag/V1.0.0.0)¿¡¼­ ¼³Ä¡ ÆÄÀÏÀ» ´Ù¿î·Îµå ÈÄ ½ÇÇàÇÕ´Ï´Ù.
+[Releases](https://github.com/LineYK/ModBusSimulator/releases/tag/V1.0.0.0)¿¡¼­ ¼³Ä¡ ÆÄÀÏÀ» ´Ù¿î·Îµå ÈÄ ½ÇÇàÇÕ´Ï´Ù.
 
 ## »ç¿ë ¹æ¹ı
 
